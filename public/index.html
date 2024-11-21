@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>デジタルクローゼット</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="form-structor">
+        <div class="signup">
+          <h2 class="form-title" id="signup"><span>or</span>Sign up</h2>
+            <form id="userMakeForm">
+              <div class="form-holder">
+                <input type="ID" id="userId" name="userId" class="input" placeholder="UserID" minlength="6" required/>
+                <input type="text" id="userName" name="userName" class="input" placeholder="Name" required/>
+                <input type="email" id="email" name="email" class="input" placeholder="Email" required/>
+                <input type="password" id="password" name="password" class="input" placeholder="Password" minlength="6" required/>
+              </div>
+              <button type="submit" class="submit-btn">Sign up</button>
+            </form>
+        </div>
+        <div class="login slide-up">
+          <div class="center">
+            <h2 class="form-title" id="login"><span>or</span>Log in</h2>
+            <form id="userLoginForm">
+              <div class="form-holder">
+                <input type="ID" id="loginUserId" name="userId" class="input" placeholder="UserID" minlength="6" required/>
+                <input type="password" id="loginPassword" name="password" class="input" placeholder="Password" minlength="6" required/>
+              </div>
+              <button type="submit" class="submit-btn">Log in</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <script src="./js/index.js"></script>
+</body>
+</html>
