@@ -11,6 +11,36 @@
         <button id="uploadButton">画像をアップロード</button>
         <div id="result"></div>
 
-        <script src="./js/upload.js"></script>
+        <script>
+            const uploadButton = document.getElementById('uploadButton');
+    const imageUpload = document.getElementById('imageUpload');
+    const resultDiv = document.getElementById('result');
+
+    uploadButton.addEventListener('click', async () => {
+      const file = imageUpload.files[0];
+      if (!file) {
+        alert('画像を選択してください。');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // 画像をサーバーにアップロードして解析結果を取得
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+
+      // 分類結果を表示
+      resultDiv.innerHTML = `
+        <h3>分類結果:</h3>
+        <ul>
+          ${data.labels.map(label => `<li>${label}</li>`).join('')}
+        </ul>
+      `;
+    });
+        </script>
     </body>
 </html>
