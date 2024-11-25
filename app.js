@@ -9,62 +9,18 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios'); //install
 const bcrypt = require('bcrypt');
-const https = require('https');
-const socketIo = require('socket.io');
-const cors = require('cors');
-const { ClarifaiStub, grpc } = require('clarifai-nodejs-grpc');
+const upload = multer({ dest: 'uploads/' });
+
+//静的ファイルの提供設定
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+
 const { Client } = require('pg');
-const FormData = require('form-data');
-const upload = multer({ dest: path.join(__dirname, 'uploads')});
-require('dotenv').config();
-// / インポート箇所 //
 
-// IPv4アドレスの取得作業 //
-function getIPAddress() {
-  const interfaces = os.networkInterfaces();
-  for (const interfaceName in interfaces) {
-    for (const iface of interfaces[interfaceName]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
-    }
-  }
-  return '127.0.0.1'; // デフォルトはローカルホスト
-}
-const host = getIPAddress();
-// / IPv4アドレスの取得作業 //
-
-// 変数設定 //
-const app = express();
-const port = 3000;
-const clients = {}; // 接続したクライアントのデータを格納（IPアドレスをキーに）
-const corsOptions = {
-  origin: `https://${host}:${port}`, // ここに許可するオリジンを指定
-  methods: ['GET', 'POST'],       // 許可するHTTPメソッドを指定
-};
-// / 変数設定 //
-
-// app.use //
-app.use(cors(corsOptions));
 // 静的ファイルの提供設定
-app.use(express.json( { limit: '50mb' }));
-app.use(express.urlencoded({ limit : '50mb', extended: true }));
-// ミドルウェア設定 //
-app.use(express.static(path.join(__dirname, 'public'))); // 静的ファイル（index.html）を提供
-
-// / app.use //
-
-// HTTPS設定 //
-const private = 'C:/ssl/private-key.pem';
-const cert = 'C:/ssl/cert.pem';
-const privateKey = fs.readFileSync(private, 'utf8');
-const certificate = fs.readFileSync(cert, 'utf8');
-const credentials = { key: privateKey, cert: certificate };
-  // HTTPSサーバーを作成 //
-  const server = https.createServer(credentials, app);
-  const io = socketIo(server);
-  // / HTTPサーバー作成 //
-// / HTTPS設定 //
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // PostgreSQLデータベースへの接続情報を設定
 const client = new Client({
@@ -74,39 +30,6 @@ const client = new Client({
   password: process.env.DB_PASS,
   port: 5432,
 });
-
-// API Key //
-const REMOVE_BG_API_KEY = process.env.RB_KEY; // Remove.bg API
-// Clarifai API Key //
-const PAT = process.env.PAT;  // あなたのPATを使用してください
-const USER_ID = 'clarifai';
-const APP_ID = 'main';
-const MODEL_ID = 'color-recognition';
-const MODEL_VERSION_ID = 'dd9458324b4b45c2be1a7ba84d27cd04';
-const IMAGE_PATH = './public/images/image0.jpg';  // 画像をセレクトして入れる予定
-const API_KEY = process.env.OWM_KEY;   // OpenWeatherMap API
-// Clarifai apparel-detection
-const clarifaiApp = new Clarifai.App({
-  apiKey: process.env.CA_CLIENT // Clarifai apparel-detection API
-});
-// /Clarifai API //
-// / API //
-
-const stub = ClarifaiStub.grpc();
-const metadata = new grpc.Metadata();
-metadata.set('authorization', 'Key ' + PAT);
-
-// 色識別 & 画像保存 //
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/images/'); // アップロード先ディレクトリを 'images/' に変更
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // ファイル名にタイムスタンプを追加
-  }
-});
-const uploadColor = multer({ storage: storage }); // 色識別
-// / 画像保存 //
 
 // データベースに接続
 client.connect()
@@ -188,53 +111,8 @@ app.post('/selectImage', (req, res) => {
   }
 });
 
-// 画像アップロードエンドポイント
-app.post('/upload', upload.single('image'), async (req, res) => {
-  
-  try {
-    if (req.file) {
-      // アップロードされたファイル情報
-      console.log('File uploaded:', req.file);
-      res.send('File uploaded successfully');
-    } else {
-      res.status(400).send('No file uploaded or file is too large');
-    }
-
-    // アップロードされた画像ファイルのパス
-    const filePath = req.file.path;
-    //画像の背景をRemove.bgで削除
-    const noBgImagePath = await removeBackground(filePath);
-
-    
-    console.log(noBgImagePath);
-    // 画像ファイルをBase64に変換
-    const imageBuffer = fs.readFileSync(noBgImagePath);
-    const base64Image = imageBuffer.toString('base64');
-
-    // Clarifaiのモデルに画像を送信して解析
-    const response = await clarifaiApp.models.predict('e0be3b9d6a454f0493ac3a30784001ff', { base64: base64Image });
-    
-    console.log(response);
-
-    if (!response.outputs || !response.outputs[0].data) {
-      throw new Error('Clarifai APIから期待したレスポンスがありません');
-    }
-
-    //分析結果から信頼度を0.8以上のラベルを取得
-    const concepts = response.outputs[0].data.concepts;
-    
-    // 分析結果をクライアントに返す
-    //ラベルをフィルタリングして信頼度の高いものを選択
-    const filteredLabels = concepts.filter(concept => concept.value > 0.8);
-    res.json({
-      labels: filteredLabels.map(concept => concept.name) // ラベルのリストを返す
-    });
-    console.log('分類結果を出しました')
-  } catch (error) {
-    console.error('画像分類中にエラーが発生しました:', error);
-    res.status(500).json({ error: '画像分類中にエラーが発生しました。' });
-  }
-});
+//Remove.bg APIキー設定
+const REMOVE_BG_API_KEY = 'RakJJata7tyDLUz9LgWM1XVp';
 
 //画像の背景を削除する関数
 async function removeBackground(imagePath) {
@@ -271,17 +149,14 @@ async function removeBackground(imagePath) {
   }
 }
 
-app.post('/tag', upload.single('image'), async (req, res) => {
-  
-  try {
-    if (req.file) {
-      // アップロードされたファイル情報
-      console.log('File uploaded:', req.file);
-      res.send('File uploaded successfully');
-    } else {
-      res.status(400).send('No file uploaded or file is too large');
-    }
+// Clarifai APIクライアントの初期化
+const clarifaiApp = new Clarifai.App({
+  apiKey: 'ceedd263955d4bcfa6f7ae540f1f4f25' // ここに取得したAPIキーを入力
+});
 
+// 画像アップロードエンドポイント
+app.post('/upload', upload.single('image'), async (req, res) => {
+  try {
     // アップロードされた画像ファイルのパス
     const filePath = req.file.path;
     //画像の背景をRemove.bgで削除
@@ -292,6 +167,8 @@ app.post('/tag', upload.single('image'), async (req, res) => {
     // 画像ファイルをBase64に変換
     const imageBuffer = fs.readFileSync(noBgImagePath);
     const base64Image = imageBuffer.toString('base64');
+
+    console.log(base64Image);
 
     // Clarifaiのモデルに画像を送信して解析
     const response = await clarifaiApp.models.predict('e0be3b9d6a454f0493ac3a30784001ff', { base64: base64Image });
