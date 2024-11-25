@@ -56,7 +56,8 @@ function confirmImage() {
     try {
         const imgInput = document.getElementById('imageUpload');
         const errorMessage = document.getElementById('errorMessage');
-        
+        const imagePreview = document.getElementById('imagePreview');
+
         // エラーをリセット
         resetErrorsAndInput();
 
