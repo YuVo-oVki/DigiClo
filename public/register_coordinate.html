@@ -5,25 +5,24 @@
   <head>
     <meta charset="utf-8">
     <title>コーディネート登録</title>
-    <link rel="stylesheet" href="./css/register_coordinate.css">
+    <link rel="stylesheet" href="./css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
   </head>
 
   <body>
-    <div>
+    <div class="button">
+      <button class="return-button" onclick="history.back()">戻る</button>
+      <button class="completion-button" id="submitButton" >登録</button>  
+    </div>
+
+    <div class="title">
         <h1 id="title">DigiClo</h1>
     </div>
 
-    <div id="submitForm">
-      <button class="return-button" onclick="history.back()">戻る</button>
-      <button class="completion-button" id="submitButton">登録</button>
-
-      <div class="coordinate-name">
-        <input type="text" class="input" id="coordinateName" placeholder="コーディネート名"/>
-      </div>
+    <div class="coord-name">
+      <input type="text" class="input" id="coordinateName" placeholder="コーディネート名"/>
     </div>
-
     <form id="imageForm">
       <div class="image-gallery">
         <div class="image-item">
@@ -65,7 +64,7 @@
       </div>
     </form>
 
-    <script src="./js/coordinate.js"></script>
+    <script src="coordinate.js"></script>
   </body>
 
 </html>
