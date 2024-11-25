@@ -11,21 +11,21 @@
   </head>
 
   <body>
-    <div class="button">
-      <button class="return-button" onclick="history.back()">戻る</button>
-      <button class="edit-button" onclick="location.href='./coordinate_edit.html'">編集</button>
-      <button class="delete-button" onclick="location.href='./coordinate_delete.html'">削除</button>
-    </div>
-    <div class="coordinate-title">
-      <h1 id="coordinateName"></h1>
-    </div>
-      <img id="mainImage" alt="コーディネート画像" class="click-image"/>
+    <div class="main">  
+      <h1 class="coordinate-title" id="coordinateName"></h1>
       <div class="gallery-back">
-        <p><コーディネート内画像一覧></p>
         <div class="image-gallery" id="imageGallery"></div>
+      </div>
+      <div class="font">
+        <p>本当に削除しますか？</p>
       </div>  
-    
-    <!-- 要改良（データベース次第） -->
+      <div class="DeleteDisplay">
+        <button class="return-button" onclick="location.href='./logined.html'">戻る</button>
+        <button class="delete" >削除</button>
+      </div>
+
+    </div>
+    <!-- 改良必須（データベース次第） -->
     <script>
       //ページをロードした時にURLパラメータからデータを取得
       window.onload = function() {
