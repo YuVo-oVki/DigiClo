@@ -75,6 +75,26 @@ function confirmImage() {
             return;
         }
 
+        const confirmBtn = document.getElementById('confirmButton');
+        const img = document.getElementById('imagePreview');
+        confirmBtn.addEventListener('click', async () => {
+            const file = img.files[0];
+            if (!file) {
+              alert('画像を選択してください。');
+              return;
+            }
+      
+            const formData = new FormData();
+            formData.append('image', file);
+      
+            // 画像をサーバーにアップロードして解析結果を取得
+            const response = await fetch('/upload', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await response.json();
+        });
+
         const reader = new FileReader();
         reader.onload = function (e) {
             // 画像データをlocalStorageに保存
