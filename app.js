@@ -14,6 +14,7 @@ const bodyParser = require('body-parser');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const { ClarifaiStub, grpc } = require('clarifai-nodejs-grpc');
+require('dotenv').config();
 const { Client } = require('pg');
 const upload = multer({ dest: 'uploads/' }); // tag
 // / インポート箇所 //
@@ -69,24 +70,28 @@ const credentials = { key: privateKey, cert: certificate };
 
 // PostgreSQLデータベースへの接続情報を設定
 const client = new Client({
-  user: 'dcdev',
-  host: 'localhost',
-  database: 'digiclo',
-  password: 'AC7Digital49Closet7!',
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASS,
   port: 5432,
 });
 
 // API Key //
-  const REMOVE_BG_API_KEY = 'RakJJata7tyDLUz9LgWM1XVp'; // Remove.bg API
-  // Clarifai API Key //
-  const PAT = 'a79dd48a3a994d6590af91e430395957';  // あなたのPATを使用してください
-  const USER_ID = 'clarifai';
-  const APP_ID = 'main';
-  const MODEL_ID = 'color-recognition';
-  const MODEL_VERSION_ID = 'dd9458324b4b45c2be1a7ba84d27cd04';
-  const IMAGE_PATH = './public/images/image0.jpg';  // 画像をセレクトして入れる予定
-  // /Clarifai API //
-  const API_KEY = "3ff0f6bd0967406bfc7926e5464b0701";   // OpenWeatherMap API
+const REMOVE_BG_API_KEY = process.env.RB_KEY; // Remove.bg API
+// Clarifai API Key //
+const PAT = process.env.PAT;  // あなたのPATを使用してください
+const USER_ID = 'clarifai';
+const APP_ID = 'main';
+const MODEL_ID = 'color-recognition';
+const MODEL_VERSION_ID = 'dd9458324b4b45c2be1a7ba84d27cd04';
+const IMAGE_PATH = './public/images/image0.jpg';  // 画像をセレクトして入れる予定
+const API_KEY = process.env.OWM_KEY;   // OpenWeatherMap API
+// Clarifai apparel-detection
+const clarifaiApp = new Clarifai.App({
+  apiKey: process.env.CA_CLIENT // Clarifai apparel-detection API
+});
+// /Clarifai API //
 // / API //
 
 const stub = ClarifaiStub.grpc();
@@ -254,11 +259,6 @@ async function removeBackground(imagePath) {
     throw new Error('背景除去に失敗しました');
   }
 }
-
-// Clarifai APIクライアントの初期化
-const clarifaiApp = new Clarifai.App({
-  apiKey: 'ceedd263955d4bcfa6f7ae540f1f4f25' // ここに取得したAPIキーを入力
-});
 
 // サーバー側でのタグエンドポイント設定
 app.post('/tag', async (req, res) => {
