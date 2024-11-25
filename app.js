@@ -15,6 +15,7 @@ const upload = multer({ dest: 'uploads/' });
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
+require('dotenv').config();
 const { Client } = require('pg');
 
 // 静的ファイルの提供設定
@@ -30,6 +31,39 @@ const client = new Client({
   password: process.env.DB_PASS,
   port: 5432,
 });
+
+// API Key //
+const REMOVE_BG_API_KEY = process.env.RB_KEY; // Remove.bg API
+// Clarifai API Key //
+const PAT = process.env.PAT;  // あなたのPATを使用してください
+const USER_ID = 'clarifai';
+const APP_ID = 'main';
+const MODEL_ID = 'color-recognition';
+const MODEL_VERSION_ID = 'dd9458324b4b45c2be1a7ba84d27cd04';
+const IMAGE_PATH = './public/images/image0.jpg';  // 画像をセレクトして入れる予定
+const API_KEY = process.env.OWM_KEY;   // OpenWeatherMap API
+// Clarifai apparel-detection
+const clarifaiApp = new Clarifai.App({
+  apiKey: process.env.CA_CLIENT // Clarifai apparel-detection API
+});
+// /Clarifai API //
+// / API //
+
+const stub = ClarifaiStub.grpc();
+const metadata = new grpc.Metadata();
+metadata.set('authorization', 'Key ' + PAT);
+
+// 色識別 & 画像保存 //
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/images/'); // アップロード先ディレクトリを 'images/' に変更
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // ファイル名にタイムスタンプを追加
+  }
+});
+const uploadColor = multer({ storage: storage }); // 色識別
+// / 画像保存 //
 
 // データベースに接続
 client.connect()
@@ -180,11 +214,6 @@ async function removeBackground(imagePath) {
     throw new Error('背景除去に失敗しました');
   }
 }
-
-// Clarifai APIクライアントの初期化
-const clarifaiApp = new Clarifai.App({
-  apiKey: 'ceedd263955d4bcfa6f7ae540f1f4f25' // ここに取得したAPIキーを入力
-});
 
 // サーバー側でのタグエンドポイント設定
 app.post('/tag', async (req, res) => {
