@@ -199,6 +199,8 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     //画像の背景をRemove.bgで削除
     const noBgImagePath = await removeBackground(filePath);
 
+    
+    console.log(noBgImagePath);
     // 画像ファイルをBase64に変換
     const imageBuffer = fs.readFileSync(noBgImagePath);
     const base64Image = imageBuffer.toString('base64');
@@ -206,13 +208,15 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     // Clarifaiのモデルに画像を送信して解析
     const response = await clarifaiApp.models.predict('e0be3b9d6a454f0493ac3a30784001ff', { base64: base64Image });
     
+    console.log(response);
+
     if (!response.outputs || !response.outputs[0].data) {
       throw new Error('Clarifai APIから期待したレスポンスがありません');
     }
 
     //分析結果から信頼度を0.8以上のラベルを取得
     const concepts = response.outputs[0].data.concepts;
-
+    
     // 分析結果をクライアントに返す
     //ラベルをフィルタリングして信頼度の高いものを選択
     const filteredLabels = concepts.filter(concept => concept.value > 0.8);
@@ -242,8 +246,6 @@ async function removeBackground(imagePath) {
       },
       responseType: 'arraybuffer' // バイナリデータとして受信
     });
-
-    console.log(response);
 
      // レスポンスのステータスコードを確認
      if (response.status !== 200) {

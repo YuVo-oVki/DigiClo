@@ -1,6 +1,6 @@
-const uploadButton = document.getElementById('uploadButton');
-const imageUpload = document.getElementById('imageUpload');
-const resultDiv = document.getElementById('result');
+const uploadButton = document.getElementById('uploadButton'); // button
+const imageUpload = document.getElementById('imageUpload'); // input tag
+const resultDiv = document.getElementById('result'); // out
 
 uploadButton.addEventListener('click', async () => {
     const file = imageUpload.files[0];

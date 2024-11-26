@@ -1,4 +1,4 @@
-document.getElementById('imageInput').addEventListener('change', handleFileSelect);
+document.getElementById('imageUpload').addEventListener('change', handleFileSelect);
 
 function resetErrorsAndInput() {
     const imagePreview = document.getElementById('imagePreview');
@@ -15,7 +15,7 @@ function resetErrorsAndInput() {
 
 function handleFileSelect() {
     try {
-        const imageInput = document.getElementById('imageInput');
+        const imageUpload = document.getElementById('imageUpload');
         const imagePreview = document.getElementById('imagePreview');
         const errorMessage = document.getElementById('errorMessage');
 
@@ -23,8 +23,8 @@ function handleFileSelect() {
         resetErrorsAndInput();
 
         // ファイルが選択されているか確認
-        if (imageInput.files && imageInput.files[0]) {
-            const file = imageInput.files[0];
+        if (imageUpload.files && imageUpload.files[0]) {
+            const file = imageUpload.files[0];
 
             // 対応している画像形式か確認
             const validFormats = ["image/jpeg", "image/png"];
@@ -54,20 +54,20 @@ function handleFileSelect() {
 
 function confirmImage() {
     try {
-        const imageInput = document.getElementById('imageInput');
+        const img = document.getElementById('imageUpload');
         const errorMessage = document.getElementById('errorMessage');
 
         // エラーをリセット
         resetErrorsAndInput();
 
         // ファイルが選択されていない場合
-        if (!imageInput.files || !imageInput.files[0]) {
+        if (!img.files || !img.files[0]) {
             errorMessage.textContent = "写真の読み込みができませんでした。";
             errorMessage.style.display = "block";
             return;
         }
 
-        const file = imageInput.files[0];
+        const file = img.files[0];
         const validFormats = ["image/jpeg", "image/png"];
         if (!validFormats.includes(file.type)) {
             errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG";
@@ -75,8 +75,8 @@ function confirmImage() {
             return;
         }
 
-        const confirmBtn = document.getElementById('confirmButton');
-        const img = document.getElementById('imagePreview');
+        const confirmBtn = document.getElementById('uploadButton');
+        // const img = document.getElementById('imagePreview');
         confirmBtn.addEventListener('click', async () => {
             const file = img.files[0];
             if (!file) {
@@ -92,12 +92,8 @@ function confirmImage() {
               method: 'POST',
               body: formData
             });
-            if (!response.ok) {
-                throw new Error('画像のアップロードに失敗しました');
-                }
+            const data = await response.json();
             
-                const data = await response.json();
-                console.log(data);  // レスポンスデータの確認
         });
 
         const reader = new FileReader();
