@@ -88,11 +88,16 @@ function confirmImage() {
             formData.append('image', file);
       
             // 画像をサーバーにアップロードして解析結果を取得
-            const response = await fetch('/tag', {
+            const response = await fetch('/upload', {
               method: 'POST',
               body: formData
             });
-            const data = await response.json();
+            if (!response.ok) {
+                throw new Error('画像のアップロードに失敗しました');
+                }
+            
+                const data = await response.json();
+                console.log(data);  // レスポンスデータの確認
         });
 
         const reader = new FileReader();
