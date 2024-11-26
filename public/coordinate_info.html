@@ -1,80 +1,52 @@
 <!DOCTYPE html>
-<!-- Website - www.codingnepalweb.com -->
-<html lang="ja" dir="ltr">
-
-  <head>
-    <meta charset="utf-8">
-    <title>コーディネート情報</title>
-    <link rel="stylesheet" href="./css/style2.css">
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+    <title>デジクロ</title>
+    <link rel="stylesheet" href="../css/style2.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
-  </head>
+    <script src="script.js" defer></script>
+</head>
+<body>
+  
+  <div id="info">
+    <div id="contents">
+      <div id="imageContainer"></div>
+      <div>DBからコーデ情報を取得</div>
+    </div>
+  </div>
 
-  <body>
-    <div class="button">
-      <button class="return-button" onclick="history.back()">戻る</button>
-      <button class="edit-button" onclick="location.href='./coordinate_edit.html'">編集</button>
-      <button class="delete-button" onclick="location.href='./coordinate_delete.html'">削除</button>
-    </div>
-    <div class="coordinate-title">
-      <h1 id="coordinateName"></h1>
-    </div>
-      <img id="mainImage" alt="コーディネート画像" class="click-image"/>
-      <div class="gallery-back">
-        <p><コーディネート内画像一覧></p>
-        <div class="image-gallery" id="imageGallery"></div>
-      </div>  
-    
-    <!-- 要改良（データベース次第） -->
     <script>
-      //ページをロードした時にURLパラメータからデータを取得
-      window.onload = function() {
-        //パラメータ取得
-        const params = new URLSearchParams(window.location.search);
-        const coordinateName = params.get('coordinateName');//テキストデータを取得
-        const selectImages = params.getAll('selectImages'); //複数の画像データを取得
-       
-        //コーディネート名を表示
-        const nameElement = document.getElementById('coordinateName');
-        nameElement.textContent = coordinateName || '未入力' ;
+        // URLのクエリパラメータからimageIdを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const imageId = urlParams.get('imageId');
+        const imageContainer = document.getElementById('imageContainer');
 
-        //画像ギャラリーの要素を取得
-        const imageGallery = document.querySelector('.image-gallery');
+        function updateWindowSize() {
+          let windowWidth = window.innerWidth;
+          let windowHeight = window.innerHeight;
 
-        //画像を動的に追加
-        selectImages.forEach((imageName) => {
-          const imageItem = document.createElement('div');
-          imageItem.classList.add('image-item');
+          // CSS変数に値を設定
+          document.documentElement.style.setProperty('--window-width', `${windowWidth}px`);
+          document.documentElement.style.setProperty('--window-height', `${windowHeight}px`);
+        }
 
-          const img = document.createElement('img');
-          img.src = `./images/Coordinate/${imageName}`; //画像パス
-          img.alt = imageName.replace(".jpg","");
+        // 初回実行でサイズを設定
+        updateWindowSize();
 
-          console.log(img.src);
-          console.log(img.alt);
+        // ウィンドウがリサイズされるたびにサイズを更新
+        window.addEventListener('resize', updateWindowSize);
 
-          imageItem.appendChild(img);
-          imageGallery.appendChild(imageItem);
-        });
-
-        let currentIndex = 0; //現在の画像インデックス
-        const mainImage = document.getElementById('mainImage');
-
-        //1枚目の画像を表示
-        mainImage.src = `./images/Coordinate/${selectImages[currentIndex]}`;
-        alt = selectImages[currentIndex];
-
-        console.log(mainImage.src);
-
-        //クリックしたら画像の切り替え
-        mainImage.addEventListener('click' , () => {
-          currentIndex = (currentIndex + 1) % selectImages.length; //次の画像へ最後まで行ったら1枚目へ
-          mainImage.src = `./images/Coordinate/${selectImages[currentIndex]}`;
-          mainImage.alt = selectImages[currentIndex];
-        });
-
-      };
+        if (imageId) {
+        const img = document.createElement('img');
+        img.src = `../images/image${imageId}.jpg`;  // パスにIDを使って画像を指定
+        img.alt = `Image${imageId}`;
+        img.width = 300;
+        imageContainer.appendChild(img);
+        } else {
+        imageContainer.innerText = '画像が選択されていません。';
+        }
     </script>
-    
 </body>
 </html>

@@ -27,10 +27,10 @@ function handleFileSelect() {
             const file = imageInput.files[0];
 
             // 対応している画像形式か確認
-            const validFormats = ["image/jpeg", "image/png", "image/gif"];
+            const validFormats = ["image/jpeg", "image/png"];
             if (!validFormats.includes(file.type)) {
                 imagePreview.classList.add("error");
-                errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG, GIF";
+                errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG";
                 errorMessage.style.display = "block";
                 return;
             }
@@ -55,7 +55,6 @@ function handleFileSelect() {
 function confirmImage() {
     try {
         const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
         const errorMessage = document.getElementById('errorMessage');
 
         // エラーをリセット
@@ -63,23 +62,46 @@ function confirmImage() {
 
         // ファイルが選択されていない場合
         if (!imageInput.files || !imageInput.files[0]) {
-            imagePreview.classList.add("error");
             errorMessage.textContent = "写真の読み込みができませんでした。";
             errorMessage.style.display = "block";
             return;
         }
 
-        // 対応形式を再チェック
         const file = imageInput.files[0];
-        const validFormats = ["image/jpeg", "image/png", "image/gif"];
+        const validFormats = ["image/jpeg", "image/png"];
         if (!validFormats.includes(file.type)) {
-            imagePreview.classList.add("error");
-            errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG, GIF";
+            errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG";
             errorMessage.style.display = "block";
             return;
         }
 
-        window.location.href = "displaytag.html";
+        const confirmBtn = document.getElementById('confirmButton');
+        const img = document.getElementById('imagePreview');
+        confirmBtn.addEventListener('click', async () => {
+            const file = img.files[0];
+            if (!file) {
+              alert('画像を選択してください。');
+              return;
+            }
+      
+            const formData = new FormData();
+            formData.append('image', file);
+      
+            // 画像をサーバーにアップロードして解析結果を取得
+            const response = await fetch('/tag', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await response.json();
+        });
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            // 画像データをlocalStorageに保存
+            localStorage.setItem('uploadedImage', e.target.result);
+            window.location.href = "displaytag.html";
+        };
+        reader.readAsDataURL(file);
     } catch (error) {
         alert("エラーが発生しました: " + error.message);
     }
