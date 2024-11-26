@@ -27,17 +27,10 @@ function handleFileSelect() {
             const file = imageInput.files[0];
 
             // 対応している画像形式か確認
-<<<<<<< HEAD
             const validFormats = ["image/jpeg", "image/png"];
             if (!validFormats.includes(file.type)) {
                 imagePreview.classList.add("error");
                 errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG";
-=======
-            const validFormats = ["image/jpeg", "image/png", "image/gif"];
-            if (!validFormats.includes(file.type)) {
-                imagePreview.classList.add("error");
-                errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG, GIF";
->>>>>>> 5272a8bfedf6855d253b1f2d626505edc286ac89
                 errorMessage.style.display = "block";
                 return;
             }
@@ -62,10 +55,6 @@ function handleFileSelect() {
 function confirmImage() {
     try {
         const imageInput = document.getElementById('imageInput');
-<<<<<<< HEAD
-=======
-        const imagePreview = document.getElementById('imagePreview');
->>>>>>> 5272a8bfedf6855d253b1f2d626505edc286ac89
         const errorMessage = document.getElementById('errorMessage');
 
         // エラーをリセット
@@ -73,33 +62,19 @@ function confirmImage() {
 
         // ファイルが選択されていない場合
         if (!imageInput.files || !imageInput.files[0]) {
-<<<<<<< HEAD
-=======
-            imagePreview.classList.add("error");
->>>>>>> 5272a8bfedf6855d253b1f2d626505edc286ac89
             errorMessage.textContent = "写真の読み込みができませんでした。";
             errorMessage.style.display = "block";
             return;
         }
 
-<<<<<<< HEAD
         const file = imageInput.files[0];
         const validFormats = ["image/jpeg", "image/png"];
         if (!validFormats.includes(file.type)) {
             errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG";
-=======
-        // 対応形式を再チェック
-        const file = imageInput.files[0];
-        const validFormats = ["image/jpeg", "image/png", "image/gif"];
-        if (!validFormats.includes(file.type)) {
-            imagePreview.classList.add("error");
-            errorMessage.textContent = "写真の形式が対応していません。対応形式: JPEG, PNG, GIF";
->>>>>>> 5272a8bfedf6855d253b1f2d626505edc286ac89
             errorMessage.style.display = "block";
             return;
         }
 
-<<<<<<< HEAD
         const confirmBtn = document.getElementById('confirmButton');
         const img = document.getElementById('imagePreview');
         confirmBtn.addEventListener('click', async () => {
@@ -113,7 +88,7 @@ function confirmImage() {
             formData.append('image', file);
       
             // 画像をサーバーにアップロードして解析結果を取得
-            const response = await fetch('/upload', {
+            const response = await fetch('/tag', {
               method: 'POST',
               body: formData
             });
@@ -127,9 +102,6 @@ function confirmImage() {
             window.location.href = "displaytag.html";
         };
         reader.readAsDataURL(file);
-=======
-        window.location.href = "displaytag.html";
->>>>>>> 5272a8bfedf6855d253b1f2d626505edc286ac89
     } catch (error) {
         alert("エラーが発生しました: " + error.message);
     }

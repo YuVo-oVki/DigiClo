@@ -22,9 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             throw new Error('レスポンスフォーマットが不正です');
         }
 
-        // タグと色を表示
-        displayTags(data.labels);
-        displayColors(data.colors);
     } catch (error) {
         console.error('タグデータ取得エラー:', error);
         alert(`エラーが発生しました: ${error.message}`);
