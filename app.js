@@ -16,7 +16,7 @@ const cors = require('cors');
 const { ClarifaiStub, grpc } = require('clarifai-nodejs-grpc');
 const { Client } = require('pg');
 const FormData = require('form-data');
-const upload = multer({ dest: 'uploads/' }); // tag
+const upload = multer({ dest: path.join(__dirname, 'uploads') });
 require('dotenv').config();
 // / インポート箇所 //
 
@@ -195,7 +195,7 @@ app.post('/selectImage', (req, res) => {
 app.post('/upload', upload.single('image'), async (req, res) => {
   try {
     // アップロードされた画像ファイルのパス
-    const filePath = path.join(__dirname, req.file.path);
+    const filePath = req.file.path;
     //画像の背景をRemove.bgで削除
     const noBgImagePath = await removeBackground(filePath);
 
@@ -206,6 +206,10 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     // Clarifaiのモデルに画像を送信して解析
     const response = await clarifaiApp.models.predict('e0be3b9d6a454f0493ac3a30784001ff', { base64: base64Image });
     
+    if (!response.outputs || !response.outputs[0].data) {
+      throw new Error('Clarifai APIから期待したレスポンスがありません');
+    }
+
     //分析結果から信頼度を0.8以上のラベルを取得
     const concepts = response.outputs[0].data.concepts;
 
@@ -222,35 +226,40 @@ app.post('/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-
 //画像の背景を削除する関数
 async function removeBackground(imagePath) {
   try {
-      const formData = new FormData();
-      formData.append('image_file', fs.createReadStream(imagePath));
-      
-      const response = await axios({
-          method: 'post',
-          url: 'https://api.remove.bg/v1.0/removebg',
-          headers: {
-              ...formData.getHeaders(),
-              'X-Api-Key': REMOVE_BG_API_KEY
-          },
-          data: formData,
-          responseType: 'arraybuffer'
-      });
+    const imageData = fs.readFileSync(imagePath);
 
-      if (response.status !== 200) {
-          throw new Error(`背景除去APIが失敗しました。ステータスコード: ${response.status}`);
-      }
+    const response = await axios({
+      method: 'post',
+      url: 'https://api.remove.bg/v1.0/removebg',
+      headers: {
+        'X-Api-Key': REMOVE_BG_API_KEY, // APIキーをここで設定
+      },
+      data: {
+        image_file_b64: imageData.toString('base64'), // Base64エンコードした画像データ
+      },
+      responseType: 'arraybuffer' // バイナリデータとして受信
+    });
 
-      const outputPath = path.join(__dirname, 'images/no-bg-image.png');
-      fs.writeFileSync(outputPath, response.data);
+    console.log(response);
 
-      return outputPath;
-  } catch (error) {
-      console.error('Remove.bg APIのエラー:', error.response ? error.response.data : error.message);
-      // throw new Error('背景除去に失敗しました');
+     // レスポンスのステータスコードを確認
+     if (response.status !== 200) {
+      throw new Error(`背景除去APIが失敗しました。ステータスコード: ${response.status}`);
+    }
+   
+    const num = 0;
+    //背景削除済みの画像データの保存
+    const outputPath = path.join(__dirname, `images/clothes/clothe${num}.png`);
+    fs.writeFileSync(outputPath, response.data);
+
+    return outputPath; //背景除去した画像のパスを返す
+  } catch (error){
+    const errorMessage = error.response ? error.response.data : error.message;
+    console.error('Remove.bg APIのエラー:', errorMessage);
+    throw new Error('背景除去に失敗しました');
   }
 }
 
@@ -262,7 +271,7 @@ app.post('/tag', upload.single('image'), async (req, res) => {
       }
 
       // 画像を一時保存
-      const tempImagePath = path.join(__dirname, 'images/temp-image.png');
+      const tempImagePath = 'images/temp-image.png';
       fs.writeFileSync(tempImagePath, image.buffer);
 
       // 背景除去処理
@@ -293,7 +302,6 @@ app.post('/tag', upload.single('image'), async (req, res) => {
       res.status(500).json({ error: '画像解析中にエラーが発生しました' });
   }
 });
-
 
 // // /color-recognitionエンドポイントで色認識を実行
 // app.get('/color-recognition', (req, res) => {

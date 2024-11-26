@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 const uploadButton = document.getElementById('uploadButton'); // button
 const imageUpload = document.getElementById('imageUpload'); // input tag
 const resultDiv = document.getElementById('result'); // out
+=======
+const uploadButton = document.getElementById('uploadButton');
+const imageUpload = document.getElementById('imageUpload');
+const resultDiv = document.getElementById('result');
+>>>>>>> 25505a2 (edited "2024-11-26")
 
 uploadButton.addEventListener('click', async () => {
     const file = imageUpload.files[0];
