@@ -10,13 +10,12 @@ const fs = require('fs');
 const axios = require('axios'); //install
 const bcrypt = require('bcrypt');
 const https = require('https');
-const bodyParser = require('body-parser');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const { ClarifaiStub, grpc } = require('clarifai-nodejs-grpc');
 const { Client } = require('pg');
 const FormData = require('form-data');
-const upload = multer({ dest: path.join(__dirname, 'uploads') });
+const upload = multer({ dest: path.join(__dirname, 'uploads')});
 require('dotenv').config();
 // / インポート箇所 //
 
@@ -48,13 +47,11 @@ const corsOptions = {
 // app.use //
 app.use(cors(corsOptions));
 // 静的ファイルの提供設定
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json( { limit: '50mb' }));
+app.use(express.urlencoded({ limit : '50mb', extended: true }));
 // ミドルウェア設定 //
-app.use(bodyParser.json()); // JSONリクエストのパース
 app.use(express.static(path.join(__dirname, 'public'))); // 静的ファイル（index.html）を提供
-app.use(express.urlencoded({ extended: true }));
+
 // / app.use //
 
 // HTTPS設定 //
@@ -193,7 +190,16 @@ app.post('/selectImage', (req, res) => {
 
 // 画像アップロードエンドポイント
 app.post('/upload', upload.single('image'), async (req, res) => {
+  
   try {
+    if (req.file) {
+      // アップロードされたファイル情報
+      console.log('File uploaded:', req.file);
+      res.send('File uploaded successfully');
+    } else {
+      res.status(400).send('No file uploaded or file is too large');
+    }
+
     // アップロードされた画像ファイルのパス
     const filePath = req.file.path;
     //画像の背景をRemove.bgで削除
@@ -266,42 +272,49 @@ async function removeBackground(imagePath) {
 }
 
 app.post('/tag', upload.single('image'), async (req, res) => {
+  
   try {
-      const image = req.file;
-      if (!image) {
-          return res.status(400).json({ error: '画像データが提供されていません' });
-      }
+    if (req.file) {
+      // アップロードされたファイル情報
+      console.log('File uploaded:', req.file);
+      res.send('File uploaded successfully');
+    } else {
+      res.status(400).send('No file uploaded or file is too large');
+    }
 
-      // 画像を一時保存
-      const tempImagePath = 'images/temp-image.png';
-      fs.writeFileSync(tempImagePath, image.buffer);
+    // アップロードされた画像ファイルのパス
+    const filePath = req.file.path;
+    //画像の背景をRemove.bgで削除
+    const noBgImagePath = await removeBackground(filePath);
 
-      // 背景除去処理
-      const noBgImagePath = await removeBackground(tempImagePath);
+    
+    console.log(noBgImagePath);
+    // 画像ファイルをBase64に変換
+    const imageBuffer = fs.readFileSync(noBgImagePath);
+    const base64Image = imageBuffer.toString('base64');
 
-      // Clarifai APIでラベル取得
-      const base64Image = fs.readFileSync(noBgImagePath).toString('base64');
-      const clarifaiResponse = await clarifaiApp.models.predict(
-          'e0be3b9d6a454f0493ac3a30784001ff', 
-          { base64: base64Image }
-      );
-      const tags = clarifaiResponse.outputs[0].data.concepts
-          .filter(c => c.value > 0.8)
-          .map(c => c.name);
+    // Clarifaiのモデルに画像を送信して解析
+    const response = await clarifaiApp.models.predict('e0be3b9d6a454f0493ac3a30784001ff', { base64: base64Image });
+    
+    console.log(response);
 
-      // 色認識処理
-      const colorsResponse = await colorRecognition(noBgImagePath);
-      const colors = colorsResponse.colors.map(c => c.w3c.name);
+    if (!response.outputs || !response.outputs[0].data) {
+      throw new Error('Clarifai APIから期待したレスポンスがありません');
+    }
 
-      // 結果を返す
-      res.json({ labels: tags, colors });
-
-      // 一時ファイルの削除
-      fs.unlinkSync(tempImagePath);
-      fs.unlinkSync(noBgImagePath);
+    //分析結果から信頼度を0.8以上のラベルを取得
+    const concepts = response.outputs[0].data.concepts;
+    
+    // 分析結果をクライアントに返す
+    //ラベルをフィルタリングして信頼度の高いものを選択
+    const filteredLabels = concepts.filter(concept => concept.value > 0.8);
+    res.json({
+      labels: filteredLabels.map(concept => concept.name) // ラベルのリストを返す
+    });
+    console.log('分類結果を出しました')
   } catch (error) {
-      console.error('サーバーエラー:', error);
-      res.status(500).json({ error: '画像解析中にエラーが発生しました' });
+    console.error('画像分類中にエラーが発生しました:', error);
+    res.status(500).json({ error: '画像分類中にエラーが発生しました。' });
   }
 });
 

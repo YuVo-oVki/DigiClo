@@ -2,4 +2,8 @@ ssl/cert.pem
 ssl/private-key.pem
 .env
 sql.txt
+<<<<<<< HEAD
 uploads
+=======
+uploads
+>>>>>>> ca983f3 (edited "2024-11-27")
