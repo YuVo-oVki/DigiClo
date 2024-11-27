@@ -77,10 +77,66 @@ body .container {
   padding: 40px;
 }
 
+.button {
+  padding: 30px 90px 10px 90px;
+  display: flex;
+  justify-content: space-between;  /* 左右に配置 */
+  align-items: center;
+}
+
+.return-button {
+  background-color: rgba(54, 198, 255, 0.634);
+  padding: 5px 25px ;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.completion-button {
+  background-color: #ff1493;
+  color: #fff;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirmation-button {
+  background-color: #ff1457d1;
+  color: #fff;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.edit-button {
+  background-color: #00ff07;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-button {
+  background-color: #ff1457d1;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete {
+  background-color: #ff1457d1;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.coord-name {
+  text-align: center;
+  font-size: 25px;
+}
+
 /* 画像の並び方 */
 .image-gallery {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);   /* 4列 */
+  grid-template-columns: repeat(5, 1fr);   /* 4列 */
   gap: 10px;
   padding: 20px;
   justify-self: center;
@@ -90,7 +146,7 @@ body .container {
 /* 画像コンテナ */
 .image-item {
   position: relative;
-  width: 100%;  /* グリッドの幅自動調整 */
+  width: 70%;  /* グリッドの幅自動調整 */
   max-width: 200px; /* 画像の最大値 */
 }
 
@@ -118,11 +174,8 @@ body .container {
 
 /* coordinate-title */
 .coordinate-title {
-  font-size: 80px;
-  padding: 10px;
-  padding-left: 100px;
-  padding-right: 100px;
-  border: 9px solid #000;
+  padding: 0px 150px;
+  border: 5px solid #000;
   justify-self: center;
   background-color: #fff;
   height: auto;
@@ -141,7 +194,22 @@ body .container {
   background-color: #fff;
 }
 
+.DeleteDisplay {
+  width: 50%;
+  display: flex;
+  justify-content: space-between;  /* 左右に配置 */
+  margin: 0 auto;
+  position: absolute
+  top 50%;
+}
 
+.font {
+  text-align: center;
+  font-weight: bold;
+  font-size: x-large;
+  color: #ff0000;
+  padding: 30px;
+}
 
 /* Responsive Design for smaller screens */
 @media (max-width: 1024px) {
