@@ -223,7 +223,7 @@ app.post('/tag', upload.single('image'), async (req, res) => {
     //ラベルをフィルタリングして信頼度の高いものを選択
     const filteredLabels = concepts.filter(concept => concept.value > 0.8);
     res.json({
-      labels: filteredLabels.map(concept => concept.name) // ラベルのリストを返す
+      labels: filteredLabels.map(concept => concept.name || "") // ラベルのリストを返す
     });
     console.log('分類結果を出しました');
   } catch (error) {
@@ -256,7 +256,7 @@ async function removeBackground(imagePath) {
    
     const num = 0;
     //背景削除済みの画像データの保存
-    const outputPath = path.join(`images/clothes/clothe${num}.png`);
+    const outputPath = path.join(__dirname, `images/clothes/clothe${num}.png`);
     fs.writeFileSync(outputPath, response.data);
 
     return outputPath; //背景除去した画像のパスを返す
