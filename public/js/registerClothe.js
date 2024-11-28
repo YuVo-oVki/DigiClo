@@ -81,7 +81,7 @@ function confirmImage() {
         formData.append('image', file);  // 'image'という名前で画像データを追加
 
         // 画像をサーバーに送信
-        fetch('/upload', {
+        fetch('/tag', {
             method: 'POST',
             body: formData
         })

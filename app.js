@@ -76,7 +76,7 @@ const client = new Client({
 });
 
 // API Key //
-const REMOVE_BG_API_KEY = process.env.RB_KEY; // Remove.bg API
+const RB_API_KEY = process.env.RB_KEY; // Remove.bg API
 // Clarifai API Key //
 const PAT = process.env.PAT;  // あなたのPATを使用してください
 const USER_ID = 'clarifai';
@@ -189,13 +189,13 @@ app.post('/selectImage', (req, res) => {
 });
 
 // 画像アップロードエンドポイント
-app.post('/upload', upload.single('image'), async (req, res) => {
-  
+app.post('/tag', upload.single('image'), async (req, res) => {
+
   try {
     if (req.file) {
       // アップロードされたファイル情報
       console.log('File uploaded:', req.file);
-      res.send('File uploaded successfully');
+      res.send(req.file);
     } else {
       res.status(400).send('No file uploaded or file is too large');
     }
@@ -205,8 +205,6 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     //画像の背景をRemove.bgで削除
     const noBgImagePath = await removeBackground(filePath);
 
-    
-    console.log(noBgImagePath);
     // 画像ファイルをBase64に変換
     const imageBuffer = fs.readFileSync(noBgImagePath);
     const base64Image = imageBuffer.toString('base64');
@@ -214,22 +212,20 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     // Clarifaiのモデルに画像を送信して解析
     const response = await clarifaiApp.models.predict('e0be3b9d6a454f0493ac3a30784001ff', { base64: base64Image });
     
-    console.log(response);
-
     if (!response.outputs || !response.outputs[0].data) {
       throw new Error('Clarifai APIから期待したレスポンスがありません');
     }
 
     //分析結果から信頼度を0.8以上のラベルを取得
     const concepts = response.outputs[0].data.concepts;
-    
+
     // 分析結果をクライアントに返す
     //ラベルをフィルタリングして信頼度の高いものを選択
     const filteredLabels = concepts.filter(concept => concept.value > 0.8);
     res.json({
       labels: filteredLabels.map(concept => concept.name) // ラベルのリストを返す
     });
-    console.log('分類結果を出しました')
+    console.log('分類結果を出しました');
   } catch (error) {
     console.error('画像分類中にエラーが発生しました:', error);
     res.status(500).json({ error: '画像分類中にエラーが発生しました。' });
@@ -245,7 +241,7 @@ async function removeBackground(imagePath) {
       method: 'post',
       url: 'https://api.remove.bg/v1.0/removebg',
       headers: {
-        'X-Api-Key': REMOVE_BG_API_KEY, // APIキーをここで設定
+        'X-Api-Key': RB_API_KEY, // APIキーをここで設定
       },
       data: {
         image_file_b64: imageData.toString('base64'), // Base64エンコードした画像データ
@@ -260,7 +256,7 @@ async function removeBackground(imagePath) {
    
     const num = 0;
     //背景削除済みの画像データの保存
-    const outputPath = path.join(__dirname, `images/clothes/clothe${num}.png`);
+    const outputPath = path.join(`images/clothes/clothe${num}.png`);
     fs.writeFileSync(outputPath, response.data);
 
     return outputPath; //背景除去した画像のパスを返す
@@ -270,53 +266,6 @@ async function removeBackground(imagePath) {
     throw new Error('背景除去に失敗しました');
   }
 }
-
-app.post('/tag', upload.single('image'), async (req, res) => {
-  
-  try {
-    if (req.file) {
-      // アップロードされたファイル情報
-      console.log('File uploaded:', req.file);
-      res.send('File uploaded successfully');
-    } else {
-      res.status(400).send('No file uploaded or file is too large');
-    }
-
-    // アップロードされた画像ファイルのパス
-    const filePath = req.file.path;
-    //画像の背景をRemove.bgで削除
-    const noBgImagePath = await removeBackground(filePath);
-
-    
-    console.log(noBgImagePath);
-    // 画像ファイルをBase64に変換
-    const imageBuffer = fs.readFileSync(noBgImagePath);
-    const base64Image = imageBuffer.toString('base64');
-
-    // Clarifaiのモデルに画像を送信して解析
-    const response = await clarifaiApp.models.predict('e0be3b9d6a454f0493ac3a30784001ff', { base64: base64Image });
-    
-    console.log(response);
-
-    if (!response.outputs || !response.outputs[0].data) {
-      throw new Error('Clarifai APIから期待したレスポンスがありません');
-    }
-
-    //分析結果から信頼度を0.8以上のラベルを取得
-    const concepts = response.outputs[0].data.concepts;
-    
-    // 分析結果をクライアントに返す
-    //ラベルをフィルタリングして信頼度の高いものを選択
-    const filteredLabels = concepts.filter(concept => concept.value > 0.8);
-    res.json({
-      labels: filteredLabels.map(concept => concept.name) // ラベルのリストを返す
-    });
-    console.log('分類結果を出しました')
-  } catch (error) {
-    console.error('画像分類中にエラーが発生しました:', error);
-    res.status(500).json({ error: '画像分類中にエラーが発生しました。' });
-  }
-});
 
 // // /color-recognitionエンドポイントで色認識を実行
 // app.get('/color-recognition', (req, res) => {
