@@ -100,7 +100,8 @@ function confirmImage() {
                 alert('画像のアップロードが成功しました！');
                 // サーバーから何かのデータ（例えば解析結果）を表示することができる
                 // ここで解析結果に基づく処理を追加できます
-                window.location.href = "displaytag.html"; // 画面遷移の例
+                localStorage.setItem('responseData', JSON.stringify(data));
+window.location.href = "displaytag.html"; // 画面遷移の例
             // } else {
                 // alert('アップロードに失敗しました: ' + data.errorMessage);
             // }

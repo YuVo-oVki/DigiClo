@@ -78,23 +78,22 @@ const client = new Client({
 // API Key //
 const RB_API_KEY = process.env.RB_KEY; // Remove.bg API
 // Clarifai API Key //
-const PAT = process.env.PAT;  // あなたのPATを使用してください
+const CR_PAT = process.env.CR_PAT;
 const USER_ID = 'clarifai';
 const APP_ID = 'main';
 const MODEL_ID = 'color-recognition';
 const MODEL_VERSION_ID = 'dd9458324b4b45c2be1a7ba84d27cd04';
-const IMAGE_PATH = './public/images/image0.jpg';  // 画像をセレクトして入れる予定
-const API_KEY = process.env.OWM_KEY;   // OpenWeatherMap API
-// Clarifai apparel-detection
 const clarifaiApp = new Clarifai.App({
   apiKey: process.env.CA_CLIENT // Clarifai apparel-detection API
 });
 // /Clarifai API //
+const PAT = process.env.PAT;  // OWM PAT
+const API_KEY = process.env.OWM_KEY;   // OpenWeatherMap API
 // / API //
 
 const stub = ClarifaiStub.grpc();
 const metadata = new grpc.Metadata();
-metadata.set('authorization', 'Key ' + PAT);
+metadata.set('authorization', 'Key ' + CR_PAT);
 
 // 色識別 & 画像保存 //
 const storage = multer.diskStorage({
@@ -192,38 +191,73 @@ app.post('/selectImage', (req, res) => {
 app.post('/tag', upload.single('image'), async (req, res) => {
 
   try {
-    if (req.file) {
-      // アップロードされたファイル情報
-      console.log('File uploaded:', req.file);
-      res.send(req.file);
-    } else {
+    if (!req.file){
       res.status(400).send('No file uploaded or file is too large');
     }
 
     // アップロードされた画像ファイルのパス
     const filePath = req.file.path;
     //画像の背景をRemove.bgで削除
-    const noBgImagePath = await removeBackground(filePath);
+    const imagePath = await removeBackground(filePath);
 
     // 画像ファイルをBase64に変換
-    const imageBuffer = fs.readFileSync(noBgImagePath);
+    const imageBuffer = fs.readFileSync(imagePath);
     const base64Image = imageBuffer.toString('base64');
 
     // Clarifaiのモデルに画像を送信して解析
     const response = await clarifaiApp.models.predict('e0be3b9d6a454f0493ac3a30784001ff', { base64: base64Image });
     
+    //分析結果から信頼度を0.8以上のラベルを取得
+    const concepts = response.outputs[0].data.concepts;
+    const filteredLabels = concepts.filter(concept => concept.value > 0.8).map(concept => concept.name);
+    
+
+
+    // color-recognition //
+      // Clarifai APIを呼び出す
+      const colorLabels = await new Promise((resolve, reject) => {
+        stub.PostModelOutputs(
+          {
+            user_app_id: {
+              user_id: USER_ID,
+              app_id: APP_ID
+            },
+            model_id: MODEL_ID,
+            version_id: MODEL_VERSION_ID,
+            inputs: [
+              { data: { image: { base64: base64Image } } }
+            ]
+          },
+          metadata,
+          (err, response) => {
+            if (err) {
+              reject('Error calling Clarifai API: ' + err);
+            }
+    
+            if (response.status.code !== 10000) {
+              reject('Clarifai API error: ' + response.status.description);
+            }
+    
+            
+            const colorArray = response.outputs[0].data.colors;
+            const colorRes = colorArray.map(color => color.w3c.name);
+            // 成功した場合にcolorsデータを返す
+            resolve(colorRes);
+          }
+        );
+      });
+
     if (!response.outputs || !response.outputs[0].data) {
       throw new Error('Clarifai APIから期待したレスポンスがありません');
     }
 
-    //分析結果から信頼度を0.8以上のラベルを取得
-    const concepts = response.outputs[0].data.concepts;
-
     // 分析結果をクライアントに返す
     //ラベルをフィルタリングして信頼度の高いものを選択
-    const filteredLabels = concepts.filter(concept => concept.value > 0.8);
+    const allLabels = [...filteredLabels, ...colorLabels]; // ラベルと色を統合
+
+    // 結果をクライアントに返す
     res.json({
-      labels: filteredLabels.map(concept => concept.name || "") // ラベルのリストを返す
+      labels: allLabels // ラベル（色を含む）を返す
     });
     console.log('分類結果を出しました');
   } catch (error) {
@@ -232,45 +266,10 @@ app.post('/tag', upload.single('image'), async (req, res) => {
   }
 });
 
-//画像の背景を削除する関数
-async function removeBackground(imagePath) {
-  try {
-    const imageData = fs.readFileSync(imagePath);
-
-    const response = await axios({
-      method: 'post',
-      url: 'https://api.remove.bg/v1.0/removebg',
-      headers: {
-        'X-Api-Key': RB_API_KEY, // APIキーをここで設定
-      },
-      data: {
-        image_file_b64: imageData.toString('base64'), // Base64エンコードした画像データ
-      },
-      responseType: 'arraybuffer' // バイナリデータとして受信
-    });
-
-     // レスポンスのステータスコードを確認
-     if (response.status !== 200) {
-      throw new Error(`背景除去APIが失敗しました。ステータスコード: ${response.status}`);
-    }
-   
-    const num = 0;
-    //背景削除済みの画像データの保存
-    const outputPath = path.join(__dirname, `images/clothes/clothe${num}.png`);
-    fs.writeFileSync(outputPath, response.data);
-
-    return outputPath; //背景除去した画像のパスを返す
-  } catch (error){
-    const errorMessage = error.response ? error.response.data : error.message;
-    console.error('Remove.bg APIのエラー:', errorMessage);
-    throw new Error('背景除去に失敗しました');
-  }
-}
-
 // // /color-recognitionエンドポイントで色認識を実行
 // app.get('/color-recognition', (req, res) => {
 //   // 画像をバイナリデータとして読み込む
-//   fs.readFile(IMAGE_PATH, (err, imageBytes) => {
+//   fs.readFile(imagePath, (err, imageBytes) => {
 //     if (err) {
 //       console.error('Failed to read image file:', err);
 //       return res.status(500).send({ error: 'Failed to read image file.' });
@@ -316,6 +315,52 @@ async function removeBackground(imagePath) {
 //     );
 //   });
 // });
+
+// 画像の背景を削除する関数
+async function removeBackground(imagePath) {
+  try {
+    const imageData = fs.readFileSync(imagePath);
+
+    const response = await axios({
+      method: 'post',
+      url: 'https://api.remove.bg/v1.0/removebg',
+      headers: {
+        'X-Api-Key': RB_API_KEY, // APIキーをここで設定
+      },
+      data: {
+        image_file_b64: imageData.toString('base64'), // Base64エンコードした画像データ
+      },
+      responseType: 'arraybuffer' // バイナリデータとして受信
+    });
+
+     // レスポンスのステータスコードを確認
+     if (response.status !== 200) {
+      throw new Error(`背景除去APIが失敗しました。ステータスコード: ${response.status}`);
+    }
+   
+    // ファイルの保存先のパス
+    let num = 1, flg = 0;
+    let outputPath = path.join(__dirname, `images/clothes/clothe${num}.png`);
+    
+    do {
+      try {
+        fs.readFileSync(outputPath);
+        outputPath = path.join(__dirname, `images/clothes/clothe${num}.png`);
+        num += 1;
+      } catch {
+        flg = 1;
+      }
+    } while(flg == 0)
+      
+    fs.writeFileSync(outputPath, response.data);
+    return outputPath; //背景除去した画像のパスを返す
+  } catch (error){
+    const errorMessage = error.response ? error.response.data : error.message;
+    console.error('Remove.bg APIのエラー:', errorMessage);
+    throw new Error('背景除去に失敗しました');
+  }
+}
+
 
 // 緯度と経度を受け取るルート
 app.post('/get-weather', (req, res) => {
@@ -402,4 +447,3 @@ app.post('/get-weather', (req, res) => {
 server.listen(port, host, () => {
     console.log(`HTTPS server running at https://${host}:${port}`);
 });
-
