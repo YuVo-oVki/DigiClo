@@ -100,6 +100,11 @@ client.connect()
   .then(() => console.log('PostgreSQLに接続しました'))
   .catch((err) => console.error('PostgreSQL接続エラー:', err));
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+  
+
 // ユーザー登録エンドポイント
 app.post('/add-user', async (req, res) => {
   const { userId, userName, email, password } = req.body;
@@ -164,30 +169,48 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/selectImage', (req, res) => {
-
-  // try {
-  //   // PostgreSQLからデータ取得
-  //   const clothesResult = await client.query('SELECT imagePath, imageid FROM clothes where UserID = $1');
-  //   const coordinateResult = await client.query('SELECT imagePath FROM coordinate where UserID = $1');
-
-  //   // JSON形式でデータ送信
-  //   res.json({
-  //       clothes: clothesResult.rows,
-  //       coordinates: coordinateResult.rows,
-  //   });
-  // } catch (error) {
-  //   console.error('データベースエラー:', error);
-  //   res.status(500).send('サーバーエラー');
-  // }
-
   const imageId = req.body.imageId;
   const kind = req.body.kind;
+
   if (kind === "Clothe") {
       res.redirect(`/clothe_info.html?imageId=${imageId}`);
   } else if (kind === "Coordinate") {
       res.redirect(`/coordinate_info.html?imageId=${imageId}`);
   } else {
       res.status(400).send('Invalid kind specified.');
+  }
+});
+
+app.get('/logined', async (req, res) => {
+  try {
+    // clothesテーブルとcoordinateテーブルからデータを取得
+    const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid';
+    const coordinatesQuery = 'SELECT coordinateid, coordinatename FROM coordinate GROUP BY coordinateid';
+
+    let clothesResult = "", coordinateResult = "";
+
+    try {
+      clothesResult = await client.query(clothesQuery);
+    } catch (err) {
+      console.log(err);
+    }
+
+    try {
+      coordinateResult = await client.query(coordinatesQuery);
+    } catch (err) {
+      console.log(err);
+    }
+
+    console.log(`clothes: ${clothesResult.rows},
+      coordinates: ${coordinateResult.rows || ""}`);
+
+    res.json({
+      clothes: clothesResult.rows,
+      coordinates: coordinateResult.rows || ""
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Database error');
   }
 });
 
@@ -290,12 +313,12 @@ async function removeBackground(imagePath) {
    
     // ファイルの保存先のパス
     let num = 1, flg = 0;
-    let outputPath = path.join(__dirname, `images/clothes/clothe${num}.png`);
+    let outputPath = `public/images/clothes/clothe${num}.png`;
     
     do {
       try {
         fs.readFileSync(outputPath);
-        outputPath = path.join(__dirname, `images/clothes/clothe${num}.png`);
+        outputPath = `public/images/clothes/clothe${num}.png`;
         num += 1;
       } catch {
         flg = 1;
@@ -315,6 +338,45 @@ app.post('/registerClothe', async (req, res) => {
   
   try {
     const { imgPath, tags } = req.body; // リクエストからデータ取得
+
+    
+    if (!imgPath || !tags) {
+      return res.status(400).json({ error: 'Missing imgPath or tags' });
+    }
+    
+    const selectQuery = `SELECT clotheid FROM "clothes" ORDER BY clotheid`;
+    const result = await client.query(selectQuery);
+    
+    const clotheArray = result.rows.length;
+
+    let insertId = 1;
+    try {
+      for (let i = 1; i <= clotheArray; i++) {
+        if (insertId == result.rows[i - 1].clotheid) {
+          insertId += 1;
+        }
+      }
+    } catch (err) {
+      console.log("clothesになにも登録されていないかDBに接続できていません。")
+    }
+
+    const insertQuery = `
+      INSERT INTO clothes(clotheid, clothetag, clotheimage, fav, userid)
+      VALUES ($1, $2, $3, $4, $5)
+      `;   
+    const flg = false, userId = 'MCGDev';     
+    client.query(insertQuery, [insertId, tags, imgPath, flg, userId]);
+    
+    res.json({status: "ok"});
+  } catch (error) {
+    console.log("エラーが発生しました: ", error);
+  }
+});
+
+app.post('/registerCoordinate', async (req, res) => {
+  
+  try {
+    // リクエストからデータ取得
 
     
     if (!imgPath || !tags) {

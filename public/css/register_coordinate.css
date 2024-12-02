@@ -229,3 +229,234 @@ body .container {
     grid-template-columns: 1fr; /* 1 column for very small screens */
   }
 }
+/* Import Google font - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+* {
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #f1f1f1 !important;
+}
+
+body .container {
+  max-width: 1100px;
+}
+
+#filter-buttons button {
+  border-radius: 3px;
+  background: #fff;
+  border-color: transparent;
+}
+
+#filter-buttons button:hover {
+  background: #ddd;
+}
+
+#filter-buttons button.active {
+  color: #fff;
+  background: #6c757d;
+}
+
+/* Grid layout for cards */
+#filterable-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.card {
+  width: 100%; /* Ensure each card takes full width of the grid cell */
+  border: 2px solid transparent;
+}
+
+.card img {
+  width: 100%; /* Ensures images are responsive and cover the card width */
+  height: 200px; /* Fixed height for images */
+  object-fit: cover; /* Maintain aspect ratio without distortion */
+}
+
+.card-body {
+  padding: 0.5rem;
+}
+
+.card.hide {
+  display: none;
+}
+
+#title {
+  margin: 0.5em;
+  font-weight: bold;
+  text-align: center;
+}
+
+#Ribbon {
+  display: flex;
+  justify-content: space-between;
+}
+
+#login_button {
+  margin: 2em;
+}
+
+.main {
+  padding: 40px;
+}
+
+.button {
+  padding: 30px 90px 10px 90px;
+  display: flex;
+  justify-content: space-between;  /* 左右に配置 */
+  align-items: center;
+}
+
+.return-button {
+  background-color: rgba(54, 198, 255, 0.634);
+  padding: 5px 25px ;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.completion-button {
+  background-color: #ff1493;
+  color: #fff;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirmation-button {
+  background-color: #ff1457d1;
+  color: #fff;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.edit-button {
+  background-color: #00ff07;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-button {
+  background-color: #ff1457d1;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete {
+  background-color: #ff1457d1;
+  padding: 5px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.coord-name {
+  text-align: center;
+  font-size: 25px;
+}
+
+
+/* 画像の並び方 */
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);   /* 5列 */
+  gap: 10px;
+  padding: 20px;
+  justify-self: center;
+  
+}
+
+/* 画像コンテナ */
+.image-item {
+  position: relative;
+  width: 70%;  /* グリッドの幅自動調整 */
+  max-width: 200px; /* 画像の最大値 */
+}
+
+/* 画像のスタイル */
+.image-item img {
+  max-width: 100%;  /* 親要素の幅に収まるように調整 */
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+
+/* チェックされた画像のスタイル */
+.image-item input[type="checkbox"]:checked + label img {
+  opacity: 0.7;  /* 選択中は半透明 */
+  border: 3px solid #007bff;  /* 選択中は青枠 */
+}
+
+.gallery-back {
+  background-color: #fff;
+  font-size: 20px;
+}
+
+/* coordinate-title */
+.coordinate-title {
+  padding: 0px 150px;
+  border: 5px solid #000;
+  justify-self: center;
+  background-color: #fff;
+  height: auto;
+}
+
+/* mainImageのスタイル */
+.click-image {
+  display: block;
+  margin: 20px auto;
+  width: 80%; /* 幅の最大値を設定 */
+  max-width: 300px;
+  height: auto; /* 高さを自動調整 */
+  border-radius: 8px; /* 角を丸く */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 影をつける */
+  cursor: pointer; /* クリック可能に */
+  background-color: #fff;
+}
+
+.DeleteDisplay {
+  width: 50%;
+  display: flex;
+  justify-content: space-between;  /* 左右に配置 */
+  margin: 0 auto;
+  position: absolute
+  top 50%;
+}
+
+.font {
+  text-align: center;
+  font-weight: bold;
+  font-size: x-large;
+  color: #ff0000;
+  padding: 30px;
+}
+
+
+
+/* Responsive Design for smaller screens */
+@media (max-width: 1024px) {
+  #filterable-cards {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns for medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  #filterable-cards {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  #filterable-cards {
+    grid-template-columns: 1fr; /* 1 column for very small screens */
+  }
+}

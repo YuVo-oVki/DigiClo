@@ -44,7 +44,7 @@
           imageItem.classList.add('image-item');
 
           const img = document.createElement('img');
-          img.src = `./images/Coordinate/${imageName}`; //画像パス
+          img.src = `./images/Clothe/${imageName}`; //画像パス
           img.alt = imageName.replace(".jpg","");
 
           console.log(img.src);
@@ -58,7 +58,7 @@
         const mainImage = document.getElementById('mainImage');
 
         //1枚目の画像を表示
-        mainImage.src = `./images/Coordinate/${selectImages[currentIndex]}`;
+        mainImage.src = `./images/Clothes/${selectImages[currentIndex]}`;
         alt = selectImages[currentIndex];
 
         console.log(mainImage.src);
@@ -66,11 +66,12 @@
         //クリックしたら画像の切り替え
         mainImage.addEventListener('click' , () => {
           currentIndex = (currentIndex + 1) % selectImages.length; //次の画像へ最後まで行ったら1枚目へ
-          mainImage.src = `./images/Coordinate/${selectImages[currentIndex]}`;
+          mainImage.src = `./images/Clothes/${selectImages[currentIndex]}`;
           mainImage.alt = selectImages[currentIndex];
         });
 
         //ここかcoordinate.jsに登録したコーディネートをデータベースへ送るJavaScriptを記述する
+        
 
 
       };

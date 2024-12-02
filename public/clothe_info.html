@@ -2,51 +2,54 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-    <title>デジクロ</title>
-    <link rel="stylesheet" href="./css/style2.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
-    <script src="script.js" defer></script>
+  <title>デジクロ</title>
+  <link rel="stylesheet" href="./css/style2.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
 </head>
 <body>
-  
   <div id="info">
     <div id="contents">
       <div id="imageContainer"></div>
-      <div>DBから衣服情報を取得</div>
+      <div id="imageInfo">DBから衣服情報を取得</div>
     </div>
   </div>
 
-    <script>
-        // URLのクエリパラメータからimageIdを取得
-        const urlParams = new URLSearchParams(window.location.search);
-        const imageId = urlParams.get('imageId');
-        const imageContainer = document.getElementById('imageContainer');
+  <script>
+    // URLのクエリパラメータから画像パスとIDを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const imagePath = urlParams.get('imagePath');
+    const imageId = urlParams.get('id');
+    const imageContainer = document.getElementById('imageContainer');
+    const imageInfo = document.getElementById('imageInfo');
 
-        function updateWindowSize() {
-          let windowWidth = window.innerWidth;
-          let windowHeight = window.innerHeight;
+    function updateWindowSize() {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
 
-          // CSS変数に値を設定
-          document.documentElement.style.setProperty('--window-width', `${windowWidth}px`);
-          document.documentElement.style.setProperty('--window-height', `${windowHeight}px`);
-        }
+      // CSS変数に値を設定
+      document.documentElement.style.setProperty('--window-width', `${windowWidth}px`);
+      document.documentElement.style.setProperty('--window-height', `${windowHeight}px`);
+    }
 
-        // 初回実行でサイズを設定
-        updateWindowSize();
+    // 初回実行でウィンドウサイズを設定
+    updateWindowSize();
+    window.addEventListener('resize', updateWindowSize);
 
-        // ウィンドウがリサイズされるたびにサイズを更新
-        window.addEventListener('resize', updateWindowSize);
+    // 画像表示処理
+    if (imagePath) {
+      const img = document.createElement('img');
+      img.src = decodeURIComponent(imagePath); // 取得した画像パスをデコードして使用
+      img.alt = `Image ${imageId}`;
+      img.style.maxWidth = "100%";
+      img.style.height = "auto";
+      imageContainer.appendChild(img);
 
-        if (imageId) {
-        const img = document.createElement('img');
-        img.src = `../images/image${imageId}.jpg`;  // パスにIDを使って画像を指定
-        img.alt = `Image${imageId}`;
-        img.width = 300;
-        imageContainer.appendChild(img);
-        } else {
-        imageContainer.innerText = '画像が選択されていません。';
-        }
-    </script>
+      // 画像IDを表示（任意で変更可能）
+      imageInfo.innerText = `衣服ID: ${imageId}`;
+    } else {
+      imageContainer.innerText = '画像が選択されていません。';
+    }
+  </script>
 </body>
 </html>

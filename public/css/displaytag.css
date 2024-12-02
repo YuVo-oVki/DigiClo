@@ -62,8 +62,17 @@ button:hover {
     background-color: #6eade8;
 }
 
+.delete-btn {
+    color: #000000;
+    border-color: #fd5454;
+}
+
+.delete-btn:hover {
+    background-color: #fd5454;
+}
+
 .edit-btn {
-    color: #00050a;
+    color: #000000;
     border-color: #80bcf5;
 }
 
@@ -72,7 +81,7 @@ button:hover {
 }
 
 .confirm-btn {
-    color: #040c01;
+    color: #000000;
     border-color: #93ee69;
 }
 

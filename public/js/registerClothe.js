@@ -56,8 +56,7 @@ function confirmImage() {
     try {
         const imgInput = document.getElementById('imageUpload');
         const errorMessage = document.getElementById('errorMessage');
-        const imagePreview = document.getElementById('imagePreview');
-
+        
         // エラーをリセット
         resetErrorsAndInput();
 
@@ -79,7 +78,6 @@ function confirmImage() {
         // 画像をサーバーに送信する
         const formData = new FormData();
         formData.append('image', file);  // 'image'という名前で画像データを追加
-
 
         // 画像をサーバーに送信
         fetch('/tag', {

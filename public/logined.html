@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <!-- Website - www.codingnepalweb.com -->
 <html lang="ja" dir="ltr">
-<head>
-    <meta charset="utf-8">
-    <title>デジクロ</title>
-    <link rel="stylesheet" href="../css/style2.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
-    <script src="./js/script.js" defer></script>
+    <head>
+        <meta charset="utf-8">
+        <title>デジクロ</title>
+        <link rel="stylesheet" href="../css/style2.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
+        <script src="./js/script.js" defer></script>
 </head>
 <body>
     <div>
@@ -44,21 +44,7 @@
         </div>
 
         <div class="row px-2 mt-4 gap-3" id="filterable-cards">
-            <!-- 衣服画像の1ブロック -->
-            <div class="card p-0" kind="Clothe">
-                <img src="../images/image0.jpg" alt="img" onclick="submitImage('0', this)">
-            </div>
-            <!-- /画像の1ブロック-->
-
-            <!-- コーデ画像の1ブロック -->
-            <div class="card p-0" kind="Coordinate">
-                <img src="../images/image0.jpg" alt="img" onclick="submitImage('0', this)">
-            </div>
-            <!-- /画像の1ブロック-->
-            
-            <div class="card p-0" kind="Coordinate">
-                <img src="../images/image1.jpg" alt="img" onclick="submitImage('1', this)">
-            </div>
+            <!-- ここに衣服とコーデを表示 -->
         </div>
 
         <form id="imageForm" action="/selectImage" method="POST">
@@ -66,7 +52,9 @@
             <input type="hidden" id="kindInput" name="kind" value="">
         </form>
 
-        <script src="logined.js"></script>
     </div>
+
+    <script src="js/logined.js"></script>
+
 </body>
 </html>
