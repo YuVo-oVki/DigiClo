@@ -30,7 +30,7 @@
         const params = new URLSearchParams(window.location.search);
         const coordinateName = params.get('coordinateName');//テキストデータを取得
         const selectImages = params.getAll('selectImages'); //複数の画像データを取得
-       
+
         //コーディネート名を表示
         const nameElement = document.getElementById('coordinateName');
         nameElement.textContent = coordinateName || '未入力' ;
@@ -44,7 +44,7 @@
           imageItem.classList.add('image-item');
 
           const img = document.createElement('img');
-          img.src = `./images/Clothe/${imageName}`; //画像パス
+          img.src = `./images/clothes/${imageName}`; //画像パス
           img.alt = imageName.replace(".jpg","");
 
           console.log(img.src);

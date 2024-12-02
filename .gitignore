@@ -1,5 +1,5 @@
 ssl/cert.pem
 ssl/private-key.pem
 .env
-sql.txt
 uploads
+public/images/clothes/*

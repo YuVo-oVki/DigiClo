@@ -184,8 +184,19 @@ app.post('/selectImage', (req, res) => {
 app.get('/logined', async (req, res) => {
   try {
     // clothesテーブルとcoordinateテーブルからデータを取得
-    const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid';
-    const coordinatesQuery = 'SELECT coordinateid, coordinatename FROM coordinate GROUP BY coordinateid';
+    const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
+    const coordinatesQuery = `
+      SELECT coordinateid, coordinatename, clotheimage
+      FROM (SELECT 
+            co.coordinateID,
+            co.coordinatename,
+            c.clotheimage,
+            ROW_NUMBER() OVER (PARTITION BY co.coordinateID ORDER BY c.clotheID) AS rn
+            FROM coordinate co
+            JOIN clothes c ON co.clotheID = c.clotheID)
+      WHERE rn = 1;
+      ;
+    `;
 
     let clothesResult = "", coordinateResult = "";
 
@@ -200,9 +211,6 @@ app.get('/logined', async (req, res) => {
     } catch (err) {
       console.log(err);
     }
-
-    console.log(`clothes: ${clothesResult.rows},
-      coordinates: ${coordinateResult.rows || ""}`);
 
     res.json({
       clothes: clothesResult.rows,
@@ -373,42 +381,26 @@ app.post('/registerClothe', async (req, res) => {
   }
 });
 
-app.post('/registerCoordinate', async (req, res) => {
+app.post('/getClothe', async (req, res) => {
   
   try {
-    // リクエストからデータ取得
+    // clothesテーブルとcoordinateテーブルからデータを取得
+    const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
 
-    
-    if (!imgPath || !tags) {
-      return res.status(400).json({ error: 'Missing imgPath or tags' });
-    }
-    
-    const selectQuery = `SELECT clotheid FROM "clothes" ORDER BY clotheid`;
-    const result = await client.query(selectQuery);
-    
-    const clotheArray = result.rows.length;
+    let clothesResult = ""
 
-    let insertId = 1;
     try {
-      for (let i = 1; i <= clotheArray; i++) {
-        if (insertId == result.rows[i - 1].clotheid) {
-          insertId += 1;
-        }
-      }
+      clothesResult = await client.query(clothesQuery);
     } catch (err) {
-      console.log("clothesになにも登録されていないかDBに接続できていません。")
+      console.log(err);
     }
 
-    const insertQuery = `
-      INSERT INTO clothes(clotheid, clothetag, clotheimage, fav, userid)
-      VALUES ($1, $2, $3, $4, $5)
-      `;   
-    const flg = false, userId = 'MCGDev';     
-    client.query(insertQuery, [insertId, tags, imgPath, flg, userId]);
-    
-    res.json({status: "ok"});
-  } catch (error) {
-    console.log("エラーが発生しました: ", error);
+    res.json({
+      clothes: clothesResult.rows
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Database error');
   }
 });
 
