@@ -164,6 +164,22 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/selectImage', (req, res) => {
+
+  // try {
+  //   // PostgreSQLからデータ取得
+  //   const clothesResult = await client.query('SELECT imagePath, imageid FROM clothes where UserID = $1');
+  //   const coordinateResult = await client.query('SELECT imagePath FROM coordinate where UserID = $1');
+
+  //   // JSON形式でデータ送信
+  //   res.json({
+  //       clothes: clothesResult.rows,
+  //       coordinates: coordinateResult.rows,
+  //   });
+  // } catch (error) {
+  //   console.error('データベースエラー:', error);
+  //   res.status(500).send('サーバーエラー');
+  // }
+
   const imageId = req.body.imageId;
   const kind = req.body.kind;
   if (kind === "Clothe") {
