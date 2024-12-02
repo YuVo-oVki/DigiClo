@@ -95,18 +95,6 @@ const stub = ClarifaiStub.grpc();
 const metadata = new grpc.Metadata();
 metadata.set('authorization', 'Key ' + CR_PAT);
 
-// 色識別 & 画像保存 //
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/images/'); // アップロード先ディレクトリを 'images/' に変更
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // ファイル名にタイムスタンプを追加
-  }
-});
-const uploadColor = multer({ storage: storage }); // 色識別
-// / 画像保存 //
-
 // データベースに接続
 client.connect()
   .then(() => console.log('PostgreSQLに接続しました'))
@@ -197,7 +185,7 @@ app.post('/tag', upload.single('image'), async (req, res) => {
 
     // アップロードされた画像ファイルのパス
     const filePath = req.file.path;
-    //画像の背景をRemove.bgで削除
+    // 画像の背景をRemove.bgで削除
     const imagePath = await removeBackground(filePath);
 
     // 画像ファイルをBase64に変換
@@ -210,8 +198,6 @@ app.post('/tag', upload.single('image'), async (req, res) => {
     //分析結果から信頼度を0.8以上のラベルを取得
     const concepts = response.outputs[0].data.concepts;
     const filteredLabels = concepts.filter(concept => concept.value > 0.8).map(concept => concept.name);
-    
-
 
     // color-recognition //
       // Clarifai APIを呼び出す
@@ -256,65 +242,13 @@ app.post('/tag', upload.single('image'), async (req, res) => {
     const allLabels = [...filteredLabels, ...colorLabels]; // ラベルと色を統合
 
     // 結果をクライアントに返す
-    res.json({
-      labels: allLabels // ラベル（色を含む）を返す
-    });
+    res.json({labels: allLabels, path: imagePath});
     console.log('分類結果を出しました');
   } catch (error) {
     console.error('画像分類中にエラーが発生しました:', error);
     res.status(500).json({ error: '画像分類中にエラーが発生しました。' });
   }
 });
-
-// // /color-recognitionエンドポイントで色認識を実行
-// app.get('/color-recognition', (req, res) => {
-//   // 画像をバイナリデータとして読み込む
-//   fs.readFile(imagePath, (err, imageBytes) => {
-//     if (err) {
-//       console.error('Failed to read image file:', err);
-//       return res.status(500).send({ error: 'Failed to read image file.' });
-//     }
-
-//     // Clarifai APIを呼び出す
-//     stub.PostModelOutputs(
-//       {
-//         user_app_id: {
-//           "user_id": USER_ID,
-//           "app_id": APP_ID
-//         },
-//         model_id: MODEL_ID,
-//         version_id: MODEL_VERSION_ID,
-//         inputs: [
-//           { data: { image: { base64: imageBytes.toString('base64') } } } // バイナリデータをBase64エンコード
-//         ]
-//       },
-//       metadata,
-//       (err, response) => {
-//         if (err) {
-//           console.error('Error calling Clarifai API:', err);
-//           return res.status(500).send({ error: 'Failed to process image: ' + err.message });
-//         }
-
-//         if (response.status.code !== 10000) {
-//           console.error('Clarifai API error:', response.status.description);
-//           return res.status(500).send({ error: 'Post model outputs failed: ' + response.status.description });
-//         }
-
-//         // 結果を処理してレスポンスに送信
-//         try {
-//           const output = response.outputs[0];
-//           const colorArray = output.data.colors;
-//           const colors = colorArray.map(color => color.w3c);
-
-//           res.json(colors); // クライアントに結果を送信
-//         } catch (processError) {
-//           console.error('Error processing response:', processError);
-//           res.status(500).send({ error: 'Error processing response.' });
-//         }
-//       }
-//     );
-//   });
-// });
 
 // 画像の背景を削除する関数
 async function removeBackground(imagePath) {
@@ -361,6 +295,44 @@ async function removeBackground(imagePath) {
   }
 }
 
+app.post('/registerClothe', async (req, res) => {
+  
+  try {
+    const { imgPath, tags } = req.body; // リクエストからデータ取得
+
+    
+    if (!imgPath || !tags) {
+      return res.status(400).json({ error: 'Missing imgPath or tags' });
+    }
+    
+    const selectQuery = `SELECT clotheid FROM "clothes" ORDER BY clotheid`;
+    const result = await client.query(selectQuery);
+    
+    const clotheArray = result.rows.length;
+
+    let insertId = 1;
+    try {
+      for (let i = 1; i <= clotheArray; i++) {
+        if (insertId == result.rows[i - 1].clotheid) {
+          insertId += 1;
+        }
+      }
+    } catch (err) {
+      console.log("clothesになにも登録されていないかDBに接続できていません。")
+    }
+
+    const insertQuery = `
+      INSERT INTO clothes(clotheid, clothetag, clotheimage, fav, userid)
+      VALUES ($1, $2, $3, $4, $5)
+      `;   
+    const flg = false, userId = 'MCGDev';     
+    client.query(insertQuery, [insertId, tags, imgPath, flg, userId]);
+    
+    res.json({status: "ok"});
+  } catch (error) {
+    console.log("エラーが発生しました: ", error);
+  }
+});
 
 // 緯度と経度を受け取るルート
 app.post('/get-weather', (req, res) => {

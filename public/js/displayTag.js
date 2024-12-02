@@ -14,19 +14,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     tagBox.innerHTML = ''; // 初期化
     data.labels.forEach(label => {
         const li = document.createElement('li');
-        li.textContent = `・${label}`;
+        li.className = "tag";
+        li.textContent = `${label}`;
         tagBox.appendChild(li);
     });
 
-    // 色情報を表示（例として色名のリストを表示）
-    const colorBox = document.createElement('div');
-    colorBox.classList.add('color-box');
-    data.colors.forEach(color => {
-        const colorDiv = document.createElement('div');
-        colorDiv.textContent = color;
-        colorDiv.style.backgroundColor = color;
-        colorDiv.classList.add('color-item');
-        colorBox.appendChild(colorDiv);
+});
+
+confBtn = document.getElementById('confirmButton');
+
+confBtn.addEventListener('click', async () => {
+    
+    const items = document.getElementsByClassName('tag');
+    const tags = Array.from(items).map(item => item.textContent).join(','); 
+
+    const data = {
+        imgPath: JSON.parse(localStorage.getItem('responseData')).path,
+        tags: tags
+    }
+    
+    fetch('/registerClothe', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data) // JSONとして送信
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Request failed');
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert('登録が完了しました！');
+        window.location.href = "logined.html"; // リダイレクト
+    })
+    .catch(error => {
+        alert("エラーが発生しました: " + error.message); // エラーメッセージ
     });
-    document.querySelector('.container').appendChild(colorBox);
+    
 });

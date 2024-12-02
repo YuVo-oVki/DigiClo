@@ -23,6 +23,9 @@
                 <div>
                     <a href="register_coordinate.html">コーデを登録する</a>
                 </div>
+                <div>
+                    <a href="suggest.html">今日のオススメは？</a>
+                </div>
             </div>
             <div>
                 <div class="Right" id="userName"></div>
@@ -63,15 +66,7 @@
             <input type="hidden" id="kindInput" name="kind" value="">
         </form>
 
-        <script>
-            function submitImage(imageId, element) {
-                console.log('Image clicked!'); // デバッグ用ログ
-                const kind = element.closest('.card').getAttribute('kind'); // 親要素の `kind` 属性を取得
-                document.getElementById('imageIdInput').value = imageId;
-                document.getElementById('kindInput').value = kind;
-                document.getElementById('imageForm').submit();
-            }
-        </script>
+        <script src="logined.js"></script>
     </div>
 </body>
 </html>
