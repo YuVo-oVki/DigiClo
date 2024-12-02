@@ -13,9 +13,6 @@ body .container {
   max-width: 1100px;
 }
 
-#submitForm {
-}
-
 #filter-buttons button {
   border-radius: 3px;
   background: #fff;
@@ -59,7 +56,7 @@ body .container {
 }
 
 #title {
-  margin: 1em;
+  margin: 0.5em;
   font-weight: bold;
   text-align: center;
 }
@@ -133,10 +130,11 @@ body .container {
   font-size: 25px;
 }
 
+
 /* 画像の並び方 */
 .image-gallery {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);   /* 4列 */
+  grid-template-columns: repeat(5, 1fr);   /* 5列 */
   gap: 10px;
   padding: 20px;
   justify-self: center;
@@ -210,6 +208,8 @@ body .container {
   color: #ff0000;
   padding: 30px;
 }
+
+
 
 /* Responsive Design for smaller screens */
 @media (max-width: 1024px) {
