@@ -88,3 +88,32 @@ body .container {
     grid-template-columns: 1fr; /* 1 column for very small screens */
   }
 }
+
+/* 検索欄を中央寄せするスタイル */
+.tag-search {
+  display: flex;
+  justify-content: center; /* 水平方向に中央寄せ */
+  align-items: center;    /* 必要なら垂直方向の揃え */
+  margin: 0 auto;         /* 自動余白で中央寄せ */
+  text-align: center;     /* テキスト要素を中央揃え */
+  height: 10vh;          /* ビューポート全体の高さを確保 */
+}
+ 
+/* 入力欄とボタンの間のスペースを調整 */
+.tag-search input,
+.tag-search button {
+  margin: 0 5px;
+}
+ 
+/* 入力欄とボタンのスタイル調整 */
+.tagInput {
+  padding: 10px;
+  font-size: 16px;
+  width: 200px;
+}
+ 
+.searchButton {
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}

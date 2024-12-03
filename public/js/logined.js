@@ -85,7 +85,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       window.location.href = `./coordinate_info.html?image=${id}`;
     }
     
-    // ページ読み込み時の初期表示
-    selectElement.dispatchEvent(new Event("change"));
     
+  document.getElementById('searchButton').addEventListener('click', async () => {
+    const word = encodeURIComponent(document.getElementById('tagInput').value);
+    window.location.href = `/search_tag.html?tag=${word}`;
+  });
+  // ページ読み込み時の初期表示
+  selectElement.dispatchEvent(new Event("change"));
 });

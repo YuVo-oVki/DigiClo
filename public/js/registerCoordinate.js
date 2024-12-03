@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    try {
+    // try {
         // JSONデータを取得
         const response = await fetch('/getClothe');
         const data = await response.json();
@@ -9,8 +9,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         // タグをHTMLに表示
         const images = document.getElementsByClassName("image-gallery");
         
-        data.labels.forEach(labelText => {
+        data.rows.forEach(row => {
             // チェックボックス付きのラベルを作成
+            const labelimage = row.clotheimage;
+
+            console.log(labelimage);
+            
             const label = document.createElement('label');
             const checkbox = document.createElement('input');
             
@@ -26,9 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             tagBox.appendChild(li); // リストアイテムをタグボックスに追加
         });
-    } catch (err) {
-        console.log(err);
-    }
+    // } catch (err) {
+    //     console.log(err);
+    // }
 
 });
 

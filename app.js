@@ -14,7 +14,6 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const { ClarifaiStub, grpc } = require('clarifai-nodejs-grpc');
 const { Client } = require('pg');
-const FormData = require('form-data');
 const upload = multer({ dest: path.join(__dirname, 'uploads')});
 require('dotenv').config();
 // / インポート箇所 //
@@ -222,6 +221,39 @@ app.get('/logined', async (req, res) => {
   }
 });
 
+app.get('/search', async (req, res) => {
+  
+  try {
+    const target = req.query.tag;
+
+    let clothesQuery = '';
+    let clothesResult = '';
+    let val = [];
+    
+    // clothesテーブルとcoordinateテーブルからデータを取得
+    if (target) {
+      clothesQuery =
+      `SELECT clotheid, clotheimage, clothetag
+      FROM clothes WHERE clothetag LIKE $1 ORDER BY clotheid;`;
+      val = [`%${target}%`]
+    } else {
+      clothesQuery = 'SELECT clotheid, clotheimage, clothetag FROM clothes;';
+    }
+
+    try {
+      clothesResult = await client.query(clothesQuery, val);
+      res.json({
+        clothes: clothesResult.rows
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Database error');
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 // 画像アップロードエンドポイント
 app.post('/tag', upload.single('image'), async (req, res) => {
 
@@ -381,11 +413,13 @@ app.post('/registerClothe', async (req, res) => {
   }
 });
 
-app.post('/getClothe', async (req, res) => {
+app.get('/getClothe', async (req, res) => {
   
   try {
+    const test = req;
     // clothesテーブルとcoordinateテーブルからデータを取得
     const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
+    console.log(clothesQuery);
 
     let clothesResult = ""
 
@@ -395,9 +429,8 @@ app.post('/getClothe', async (req, res) => {
       console.log(err);
     }
 
-    res.json({
-      clothes: clothesResult.rows
-    });
+
+    res.json({ rows: clothesResult.rows });
   } catch (err) {
     console.error(err);
     res.status(500).send('Database error');
@@ -429,8 +462,6 @@ app.post('/get-weather', (req, res) => {
     return res.status(400).json({ error: "緯度または経度が不足しています。" });
   }
 
-  // 3h ver.
-  const url3h = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric&lang=ja`;
   // 1h ver.
   const url1h = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric&lang=ja`;
 
