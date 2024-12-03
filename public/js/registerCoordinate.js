@@ -3,37 +3,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         // JSONデータを取得
         const response = await fetch('/getClothe');
         const data = await response.json();
-
-        console.log(data);
-
+        
         // タグをHTMLに表示
-        const images = document.getElementsByClassName("image-gallery");
+        const gallery = document.querySelector("image-gallery");
         
         data.rows.forEach(row => {
-            // チェックボックス付きのラベルを作成
-            const labelimage = row.clotheimage;
 
-            console.log(labelimage);
-            
-            const label = document.createElement('label');
-            const checkbox = document.createElement('input');
-            
-            checkbox.type = 'checkbox';
-            checkbox.value = labelText; // チェックボックスの値としてタグ名を設定
-            
-            label.appendChild(checkbox); // チェックボックスをラベルに追加
-            label.appendChild(document.createTextNode(labelText)); // ラベルテキストを追加
-            
-            const li = document.createElement('li');
-            li.className = 'tag';
-            li.appendChild(label); // ラベルをリストアイテムに追加
-            
-            tagBox.appendChild(li); // リストアイテムをタグボックスに追加
+        const imageItem = document.createElement('div');
+        imageItem.classList.add('image-item');
+        // input要素を作成
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `image${row.clotheid}`;
+        checkbox.name = 'selectImages';
+        checkbox.value = `image${row.clotheid}.png`;
+
+        // label要素を作成
+        const label = document.createElement('label');
+        label.setAttribute('for', `image${row.clotheid}`);
+
+        // img要素を作成
+        const img = document.createElement('img');
+        img.src = row.path;
+        img.alt = row.clotheid;
+
+        // labelにimgを追加
+        label.appendChild(img);
+
+        // imageItemにinputとlabelを追加
+        imageItem.appendChild(checkbox);
+        imageItem.appendChild(label);
+
+        // galleryにimageItemを追加
+        console.log(imageItem);
+        gallery.appendChild(imageItem);
         });
     // } catch (err) {
     //     console.log(err);
     // }
-
 });
 
 //ボタンをクリックしたら

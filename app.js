@@ -3,6 +3,7 @@
 // インポート箇所 //
 const os = require('os');
 const express = require('express'); //install
+const jwt = require('jsonwebtoken'); // セッション機能で使う予定
 const multer = require('multer'); //install
 const Clarifai = require('clarifai'); //clarifai
 const path = require('path');
@@ -416,10 +417,8 @@ app.post('/registerClothe', async (req, res) => {
 app.get('/getClothe', async (req, res) => {
   
   try {
-    const test = req;
     // clothesテーブルとcoordinateテーブルからデータを取得
     const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
-    console.log(clothesQuery);
 
     let clothesResult = ""
 
