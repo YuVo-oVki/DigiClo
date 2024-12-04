@@ -414,7 +414,31 @@ app.post('/registerClothe', async (req, res) => {
   }
 });
 
-app.get('/getClothe', async (req, res) => {
+app.post('/editTag', async (req, res) => {
+  
+  try {
+    const { clotheid, tags } = req.body;
+
+    if (!clotheid || !tags) {
+      return res.status(400).json({ error: 'Missing clotheID or tags' });
+    }
+    
+    let result = "";
+
+    try {
+      const updateQuery = `UPDATE clothes SET clothetag = $1 WHERE clotheid = $2`;
+      result = await client.query(updateQuery, [tags, clotheid]);
+    } catch (err) {
+      console.log("clothesに登録されていません。")
+    }
+    
+    res.json({ status: result });
+  } catch (error) {
+    console.log("エラーが発生しました: ", error);
+  }
+});
+
+app.get('/getClotheAll', async (req, res) => {
   
   try {
     // clothesテーブルとcoordinateテーブルからデータを取得
@@ -433,6 +457,69 @@ app.get('/getClothe', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Database error');
+  }
+});
+
+app.post('/getClotheTag', async (req, res) => {
+
+  try {
+    const clotheId = req.body.clotheId;
+    // clothesテーブルとcoordinateテーブルからデータを取得
+    const clothesQuery = 'SELECT clotheid, clotheTag FROM clothes WHERE clotheid = $1;';
+
+    let clotheTag = ""
+
+    try {
+      const clothesResult = await client.query(clothesQuery, [clotheId]);
+      if (clothesResult.rows.length === 0) {
+          res.status(404).json({ error: "Clothe not found" });
+          return;
+      }
+      clotheTag = clothesResult.rows[0].clothetag;
+    } catch (err) {
+      console.log(err);
+    }
+
+    console.log(clotheTag);
+
+    res.json({ tags: clotheTag });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Database error');
+  }
+});
+
+app.post('/registerCoordinate', async (req, res) => {
+  try {
+
+      // coordinateIDの決定
+      const userId = req.body[0].userId;
+      const selectQuery = `SELECT userid, max(coordinateid) as coordinateid FROM coordinate WHERE userid = $1 GROUP BY userid;`;
+      const selectResult = await client.query(selectQuery, [userId]);
+      
+      let newCoordinateId = "";
+      try  {
+        const coordinateId = selectResult.rows[0].coordinateid;
+        newCoordinateId = coordinateId + 1;
+      } catch (err) {
+        newCoordinateId = 1;
+      }
+    
+      // 保存先DBに対するINSERT INTOクエリ
+      const insertQuery = `
+          INSERT INTO coordinate(userid, coordinateid, clotheid, coordinatename)
+          VALUES ($1, $2, $3, $4);
+      `;
+
+
+      for (let i = 0; i < req.body.length; i++) {
+        let { userId, clotheId, coordinateName } = req.body[i];
+        await client.query(insertQuery, [userId, newCoordinateId, clotheId, coordinateName]);
+      }
+      res.json({ status: 'ok' });
+  } catch (err) {
+      console.error('エラー:', err);
+      res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
@@ -461,7 +548,6 @@ app.post('/get-weather', (req, res) => {
     return res.status(400).json({ error: "緯度または経度が不足しています。" });
   }
 
-  // 1h ver.
   const url1h = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric&lang=ja`;
 
   // 天d気データの取得

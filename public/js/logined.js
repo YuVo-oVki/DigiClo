@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       img.src = cloth.clotheimage;
       img.alt = "img";
       img.onclick = function() {
-        submitImage(cloth.clotheid, this);
+        goToClotheInfo(cloth.clotheid, this);
       };
       
       card.appendChild(img);
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       img.src = coord.clotheimage;
       img.alt = "img";
       img.onclick = function() {
-        submitImage(coord.coordinateid, this);
+        goToCoordinateInfo(coord.coordinateid, this);
       };
 
       const bg = document.createElement('div');
@@ -78,13 +78,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   });
 
-  function submitImage(id) {
-    if (selectedValue == "Clothe") {
-      window.location.href = `./clothe_info.html?image=${id}`;
-    } else if (selectedValue == "Coordinate")
-      window.location.href = `./coordinate_info.html?image=${id}`;
-    }
-    
+  // 衣服の詳細ページに遷移
+  function goToClotheInfo(imageId) {
+    sessionStorage.setItem('id', imageId)
+    window.location.href = `./clothe_info.html?imageId=${imageId}`;
+  }
+
+  // コーデの詳細ページに遷移
+  function goToCoordinateInfo(imageId) {
+    sessionStorage.setItem('id', imageId);
+    window.location.href = `./coordinate_info.html?imageId=${imageId}`;
+  }
     
   document.getElementById('searchButton').addEventListener('click', async () => {
     const word = encodeURIComponent(document.getElementById('tagInput').value);

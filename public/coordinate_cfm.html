@@ -11,10 +11,12 @@
   </head>
 
   <body>
-    <div class="main">
+    <div class="button">
       <button class="return-button" onclick="history.back()">戻る</button>
-      <button class="confirmation-button" onclick="logined.html">完了</button>
-  
+      <button class="confirmation-button">完了</button>
+    </div>
+
+    <div>
       <h1 class="coordinate-title" id="coordinateName"></h1>
       <img id="mainImage" alt="コーディネート画像" class="click-image"/>
       <div class="gallery-back">
@@ -23,59 +25,7 @@
       </div>  
     </div>
 
-    <script>
-      //ページをロードした時にURLパラメータからデータを取得
-      window.onload = function() {
-        //パラメータ取得
-        const params = new URLSearchParams(window.location.search);
-        const coordinateName = params.get('coordinateName');//テキストデータを取得
-        const selectImages = params.getAll('selectImages'); //複数の画像データを取得
-
-        //コーディネート名を表示
-        const nameElement = document.getElementById('coordinateName');
-        nameElement.textContent = coordinateName || '未入力' ;
-
-        //画像ギャラリーの要素を取得
-        const imageGallery = document.querySelector('.image-gallery');
-
-        //画像を動的に追加
-        selectImages.forEach((imageName) => {
-          const imageItem = document.createElement('div');
-          imageItem.classList.add('image-item');
-
-          const img = document.createElement('img');
-          img.src = `./images/clothes/${imageName}`; //画像パス
-          img.alt = imageName.replace(".jpg","");
-
-          console.log(img.src);
-          console.log(img.alt);
-
-          imageItem.appendChild(img);
-          imageGallery.appendChild(imageItem);
-        });
-
-        let currentIndex = 0; //現在の画像インデックス
-        const mainImage = document.getElementById('mainImage');
-
-        //1枚目の画像を表示
-        mainImage.src = `./images/Clothes/${selectImages[currentIndex]}`;
-        alt = selectImages[currentIndex];
-
-        console.log(mainImage.src);
-
-        //クリックしたら画像の切り替え
-        mainImage.addEventListener('click' , () => {
-          currentIndex = (currentIndex + 1) % selectImages.length; //次の画像へ最後まで行ったら1枚目へ
-          mainImage.src = `./images/Clothes/${selectImages[currentIndex]}`;
-          mainImage.alt = selectImages[currentIndex];
-        });
-
-        //ここかcoordinate.jsに登録したコーディネートをデータベースへ送るJavaScriptを記述する
-        
-
-
-      };
-    </script>
+    <script src="./js/confirmCoordinate.js"></script>
     
 </body>
 </html>
