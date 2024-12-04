@@ -58,7 +58,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   } catch (error) {
     console.error('Error fetching data:', error);
   }
-
   const selectElement = document.getElementById("change"); // セレクトボックス
   const cards = document.getElementsByClassName("card p-0"); // "card"クラスの要素を取得
   let selectedValue = "";
@@ -80,7 +79,21 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // 衣服の詳細ページに遷移
   function goToClotheInfo(imageId) {
-    sessionStorage.setItem('id', imageId)
+
+    formdata = { clotheId: imageId };
+
+    fetch('/getClotheTag', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formdata)
+  })
+  .then(response => response.json()) // レスポンスをJSON形式に変換
+  .then(data => {
+
+  })
+  .catch(error => console.error('Error:', error));
     window.location.href = `./clothe_info.html?imageId=${imageId}`;
   }
 
@@ -97,3 +110,4 @@ document.addEventListener("DOMContentLoaded", async function () {
   // ページ読み込み時の初期表示
   selectElement.dispatchEvent(new Event("change"));
 });
+

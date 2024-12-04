@@ -323,7 +323,6 @@ app.post('/tag', upload.single('image'), async (req, res) => {
 
     // 結果をクライアントに返す
     res.json({labels: allLabels, path: imagePath});
-    console.log('分類結果を出しました');
   } catch (error) {
     console.error('画像分類中にエラーが発生しました:', error);
     res.status(500).json({ error: '画像分類中にエラーが発生しました。' });
@@ -414,6 +413,34 @@ app.post('/registerClothe', async (req, res) => {
   }
 });
 
+app.post('/getClotheTag', async (req, res) => {
+  
+  try {
+    const clotheId = req.body.clotheId;
+    // clothesテーブルとcoordinateテーブルからデータを取得
+    const clothesQuery = 'SELECT clotheid, clotheTag, clotheimage FROM clothes WHERE clotheid = $1;';
+    
+    let clotheTag = "", image = "";
+    
+    try {
+      const clothesResult = await client.query(clothesQuery, [clotheId]);
+      if (clothesResult.rows.length === 0) {
+        res.status(404).json({ error: "Clothe not found" });
+        return;
+      }
+      clotheTag = clothesResult.rows[0].clothetag;
+      image = clothesResult.rows[0].clotheimage;
+    } catch (err) {
+      console.log(err);
+    }
+    
+    res.json({ tags: clotheTag, path: image });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Database error');
+  }
+});
+
 app.post('/editTag', async (req, res) => {
   
   try {
@@ -431,58 +458,58 @@ app.post('/editTag', async (req, res) => {
     } catch (err) {
       console.log("clothesに登録されていません。")
     }
-    
     res.json({ status: result });
   } catch (error) {
     console.log("エラーが発生しました: ", error);
   }
 });
 
+app.post('/deleteClothe', async(req, res) => {
+  
+  const { clotheId } = req.body;
+
+  try {
+    const selectQuery = 'SELECT clotheimage FROM clothes WHERE clotheid = $1';
+    const deleteQuery = 'DELETE FROM clothes WHERE clotheid = $1';
+    const clotheResult = await client.query(selectQuery, [clotheId]);
+    await client.query(deleteQuery, [clotheId]);
+
+    const deleteFile = (filePath) => {
+      fs.unlink(filePath, (err) => {
+          if (err) {
+              console.error(`Error deleting file: ${err.message}`);
+              return;
+          }
+      });
+    };
+    deleteFile(`./public/${clotheResult.rows[0].clotheimage}`);
+
+    res.json({ status: "ok" });
+  } catch (err) {
+    console.error(err);
+    if (err.code == "23503") {
+      res.status(404).json('fKey error')
+    } else {
+      res.status(500).json('Deletion error');
+    }
+  }
+}); 
+
 app.get('/getClotheAll', async (req, res) => {
   
   try {
     // clothesテーブルとcoordinateテーブルからデータを取得
     const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
-
-    let clothesResult = ""
-
+    let clothesResult = "";
+    
     try {
       clothesResult = await client.query(clothesQuery);
     } catch (err) {
       console.log(err);
     }
-
-
+    
+    
     res.json({ rows: clothesResult.rows });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Database error');
-  }
-});
-
-app.post('/getClotheTag', async (req, res) => {
-
-  try {
-    const clotheId = req.body.clotheId;
-    // clothesテーブルとcoordinateテーブルからデータを取得
-    const clothesQuery = 'SELECT clotheid, clotheTag FROM clothes WHERE clotheid = $1;';
-
-    let clotheTag = ""
-
-    try {
-      const clothesResult = await client.query(clothesQuery, [clotheId]);
-      if (clothesResult.rows.length === 0) {
-          res.status(404).json({ error: "Clothe not found" });
-          return;
-      }
-      clotheTag = clothesResult.rows[0].clothetag;
-    } catch (err) {
-      console.log(err);
-    }
-
-    console.log(clotheTag);
-
-    res.json({ tags: clotheTag });
   } catch (err) {
     console.error(err);
     res.status(500).send('Database error');
@@ -491,15 +518,15 @@ app.post('/getClotheTag', async (req, res) => {
 
 app.post('/registerCoordinate', async (req, res) => {
   try {
-
-      // coordinateIDの決定
-      const userId = req.body[0].userId;
-      const selectQuery = `SELECT userid, max(coordinateid) as coordinateid FROM coordinate WHERE userid = $1 GROUP BY userid;`;
-      const selectResult = await client.query(selectQuery, [userId]);
-      
-      let newCoordinateId = "";
-      try  {
-        const coordinateId = selectResult.rows[0].coordinateid;
+    
+    // coordinateIDの決定
+    const userId = req.body[0].userId;
+    const selectQuery = `SELECT userid, max(coordinateid) as coordinateid FROM coordinate WHERE userid = $1 GROUP BY userid;`;
+    const selectResult = await client.query(selectQuery, [userId]);
+    
+    let newCoordinateId = "";
+    try  {
+      const coordinateId = selectResult.rows[0].coordinateid;
         newCoordinateId = coordinateId + 1;
       } catch (err) {
         newCoordinateId = 1;
@@ -507,34 +534,76 @@ app.post('/registerCoordinate', async (req, res) => {
     
       // 保存先DBに対するINSERT INTOクエリ
       const insertQuery = `
-          INSERT INTO coordinate(userid, coordinateid, clotheid, coordinatename)
-          VALUES ($1, $2, $3, $4);
+      INSERT INTO coordinate(userid, coordinateid, clotheid, coordinatename)
+      VALUES ($1, $2, $3, $4);
       `;
-
-
+      
+      
       for (let i = 0; i < req.body.length; i++) {
         let { userId, clotheId, coordinateName } = req.body[i];
         await client.query(insertQuery, [userId, newCoordinateId, clotheId, coordinateName]);
       }
       res.json({ status: 'ok' });
-  } catch (err) {
+    } catch (err) {
       console.error('エラー:', err);
       res.status(500).json({ error: 'Database error', details: err.message });
-  }
-});
+    }
+  });
+
+  app.post('/getCoordinateInfo', async (req, res) => {
+    const coorId = req.body.coordinateId;
+    
+    try {
+      // clothesテーブルとcoordinateテーブルからデータを取得
+      const clothesQuery = `
+        SELECT clothes.clotheid, clotheimage, coordinatename FROM clothes
+        INNER JOIN coordinate
+        ON clothes.clotheid = coordinate.clotheid
+        WHERE coordinateid = $1;
+      `;
+      let clothesResult = "";
+      
+      try {
+        clothesResult = await client.query(clothesQuery, [coorId]);
+      } catch (err) {
+        console.log(err);
+      }
+      
+      res.json({ rows: clothesResult.rows });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json('Database error');
+    }
+  });
+  
+  app.post('/deleteCoordinate', async(req, res) => {
+    
+    const { coordinateId } = req.body;
+    console.log(coordinateId)
+  
+    try {
+      const deleteQuery = 'DELETE FROM coordinate WHERE coordinateid = $1';
+      await client.query(deleteQuery, [coordinateId]);
+
+      res.json({ status: "ok" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Deletion error');
+    }
+  }); 
 
 // 緯度と経度を受け取るルート
 app.post('/get-weather', (req, res) => {
   // クライアントの接続を処理
   io.on('connection', (socket) => {
     console.log('A user connected');
-
+    
     // クライアントが位置情報を送信してきたときの処理
     socket.on('location-update', (data) => {
-        const clientId = socket.id;
-        clients[clientId] = { lat: data.latitude, lon: data.longitude };
+      const clientId = socket.id;
+      clients[clientId] = { lat: data.latitude, lon: data.longitude };
     });
-
+    
     // クライアントの切断を処理
     socket.on('disconnect', () => {
         console.log('User disconnected');
