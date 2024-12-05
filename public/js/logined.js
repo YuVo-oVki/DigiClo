@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     formdata = { clotheId: imageId };
 
-    fetch('/getClotheTag', {
+    fetch('/getClothe', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',

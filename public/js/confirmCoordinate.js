@@ -3,7 +3,8 @@ window.onload = function() {
     //パラメータ取得
     const params = new URLSearchParams(window.location.search);
     const coordinateName = params.get('coordinateName');//テキストデータを取得
-    const selectImages = params.getAll('selectImages'); //複数の画像データを取得
+    const selectImagePath = params.getAll('selectImagePath'); //複数の画像データを取得
+    const selectImageId = params.getAll('selectImageId'); //複数のclotheIdを取得
 
     //コーディネート名を表示
     const nameElement = document.getElementById('coordinateName');
@@ -13,48 +14,47 @@ window.onload = function() {
     const imageGallery = document.querySelector('.image-gallery');
 
     //画像を動的に追加
-    selectImages.forEach((imageName) => {
-
+    selectImagePath.forEach((imgRow) => {
         const imageItem = document.createElement('div');
         imageItem.classList.add('image-item');
 
         const img = document.createElement('img');
-        img.src = `./images/clothes/${imageName}`; //画像パス
-        img.alt = imageName.replace("clothe", "image").replace(".png","");
+        img.src = `${imgRow}`; //画像パス
+        img.alt = imgRow.replace("clothe", "image").replace(".png","");
 
-      imageItem.appendChild(img);
-      imageGallery.appendChild(imageItem);
+        imageItem.appendChild(img);
+        imageGallery.appendChild(imageItem);
     });
 
     let currentIndex = 0; //現在の画像インデックス
     const mainImage = document.getElementById('mainImage');
 
     //1枚目の画像を表示
-    mainImage.src = `./images/clothes/${selectImages[currentIndex]}`;
-    alt = selectImages[currentIndex];
+    mainImage.src = `${selectImagePath[currentIndex]}`;
+    alt = selectImagePath[currentIndex];
 
     //クリックしたら画像の切り替え
     mainImage.addEventListener('click' , () => {
-        currentIndex = (currentIndex + 1) % selectImages.length; //次の画像へ最後まで行ったら1枚目へ
-        mainImage.src = `./images/Clothes/${selectImages[currentIndex]}`;
-        mainImage.alt = selectImages[currentIndex];
+        currentIndex = (currentIndex + 1) % selectImagePath.length; //次の画像へ最後まで行ったら1枚目へ
+        mainImage.src = `${selectImagePath[currentIndex]}`;
+        mainImage.alt = selectImagePath[currentIndex];
     });
 
     const confBtn = document.getElementsByClassName('confirmation-button')[0];
-    
+
     confBtn.addEventListener('click', async () => {
+    
+        let formdata = [];
+        selectImageId.forEach(id => {
+            id = id.replace('clothe', '');
+            formdata.push({
+                userId: 'MCGDev',
+                clotheId: id,
+                coordinateName: coordinateName
+            });
+        });
 
-        // try {
-            let formdata = []; // 配列として初期化
-
-            for (let i = 0; i < selectImages.length; i++) {
-                let id = selectImages[i].replace("clothe", "").replace(".png", ""); // clotheと.pngを除去
-                formdata.push({
-                    userId: 'MCGDev',             // ユーザーID
-                    clotheId: id,  // 数値として扱う
-                    coordinateName: coordinateName // コーディネート名
-                });
-            }
+        console.log(formdata);
 
             await fetch('/registerCoordinate', {
                 method: 'POST',

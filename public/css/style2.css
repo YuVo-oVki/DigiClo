@@ -225,6 +225,20 @@ button {
   right: 0; /* メニューが表示される状態 */
 }
 
+/* メニューが開いているときの body */
+body.drawer-open {
+  overflow: hidden; /* スクロールを無効化して見切れを防ぐ */
+}
+
+/* コンテンツ全体の調整 */
+.main-content {
+  transition: margin-right 0.3s ease; /* メニューと一緒に動く */
+}
+
+body.drawer-open .main-content {
+  margin-right: 250px; /* メニュー幅分右にずらす  */
+}
+
 #drawerMenu ul {
   list-style-type: none;
   padding: 0;
@@ -278,7 +292,7 @@ button {
 
 /* メニューが開いたときのボタンの位置 */
 #menuButton.active {
-  right: 270px; /* メニュー幅(250px) + 余白(20px) */
+  right: 250px; /* メニュー幅(250px) + 余白(20px) */
   transform: rotate(90deg); /* ボタンを90度回転 */
   background-color: #ff5f5f; /* 背景色を変更 */
 }

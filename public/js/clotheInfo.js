@@ -9,7 +9,7 @@ window.onload = async () => {
     
     if (imageId) {
         try {
-            const response = await fetch('/getClotheTag', {
+            const response = await fetch('/getClothe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

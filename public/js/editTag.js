@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clotheid = sessionStorage.getItem('id');;
     const formdata = { clotheId : clotheid };
 
-    fetch('/getClotheTag', {
+    fetch('/getClothe', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

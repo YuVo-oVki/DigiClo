@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!-- Website - www.codingnepalweb.com -->
 <html lang="ja" dir="ltr">
+
     <head>
         <meta charset="utf-8">
         <title>デジクロ</title>
@@ -8,57 +9,59 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
         <!-- <script src="./js/script.js" defer></script> -->
-</head>
-<body>
-    <div>
-        <h1 id="title">DigiClo</h1>
-    </div>
+    </head>
 
-    <!-- メニューボタン -->
-    <button id="menuButton">≡</button>
- 
-    <!-- ドロワーメニュー -->
-    <div id="drawerMenu">
-        <ul>
-            <li id="loginUser"></li>
-            <li><a href="register_clothe.html">衣服を登録する</a></li>
-            <li><a href="register_coordinate.html">コーデを登録する</a></li>
-            <li><a href="suggest.html">今日のオススメは？</a></li>
-            <li><a href="index.html">ログアウト</a></li>
-        </ul>
-    </div>
- 
-    <!-- オーバーレイ -->
-    <div id="drawerOverlay"></div>
-
-        <div class="tag-search">
-            <input type="text" id="tagInput" placeholder="タグを検索">
-            <button id="searchButton">検索</button>
+    <body>
+        <div>
+            <h1 id="title">DigiClo</h1>
         </div>
-        <div class="tag-result" id="searchResults"></div>
 
-        <!-- Images Filter Buttons Section -->
-        <div class="row mt-5" id="filter-buttons">
-            <div class="col-12">
-                <select id="change">
-                    <option value="Clothe" selected>衣服</option>
-                    <option value="Coordinate">コーデ</option>
-                </select>
+        <!-- メニューボタン -->
+        <button id="menuButton">≡</button>
+
+        <div class="container">
+    
+            <!-- ドロワーメニュー -->
+            <div id="drawerMenu">
+                <ul>
+                    <li id="loginUser"></li>
+                    <li><a href="register_clothe.html">衣服を登録する</a></li>
+                    <li><a href="register_coordinate.html">コーデを登録する</a></li>
+                    <li><a href="suggest.html">今日のオススメは？</a></li>
+                    <li><a href="index.html">ログアウト</a></li>
+                </ul>
             </div>
+    
+            <!-- オーバーレイ -->
+            <div id="drawerOverlay"></div>
+
+            <div class="tag-search">
+                <input type="text" id="tagInput" placeholder="タグを検索">
+                <button id="searchButton">検索</button>
+            </div>
+            <div class="tag-result" id="searchResults"></div>
+
+            <!-- Images Filter Buttons Section -->
+            <div class="row mt-5" id="filter-buttons">
+                <div class="col-12">
+                    <select id="change">
+                        <option value="Clothe" selected>衣服</option>
+                        <option value="Coordinate">コーデ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row px-2 mt-4 gap-3" id="filterable-cards">
+                <!-- ここに衣服とコーデを表示 -->
+            </div>
+
+            <form id="imageForm" action="/selectImage" method="POST">
+                <input type="hidden" id="imageIdInput" name="imageId" value="">
+                <input type="hidden" id="kindInput" name="kind" value="">
+            </form>
         </div>
 
-        <div class="row px-2 mt-4 gap-3" id="filterable-cards">
-            <!-- ここに衣服とコーデを表示 -->
-        </div>
+        <script src="js/logined.js"></script>
 
-        <form id="imageForm" action="/selectImage" method="POST">
-            <input type="hidden" id="imageIdInput" name="imageId" value="">
-            <input type="hidden" id="kindInput" name="kind" value="">
-        </form>
-
-    </div>
-
-    <script src="js/logined.js"></script>
-
-</body>
+    </body>
 </html>

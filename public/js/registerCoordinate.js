@@ -11,21 +11,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const imageItem = document.createElement('div');
             imageItem.classList.add('image-item');
+            
+            // label要素を作成
+            const label = document.createElement('label');
+            label.setAttribute('for', `clothe${row.clotheid}`);
+            
+            // img要素を作成
+            const img = document.createElement('img');
+            img.src = row.clotheimage;
+            img.alt = row.clotheid;
+
             // input要素を作成
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.id = `clothe${row.clotheid}`;
             checkbox.name = 'selectImages';
-            checkbox.value = `clothe${row.clotheid}.png`;
-
-            // label要素を作成
-            const label = document.createElement('label');
-            label.setAttribute('for', `clothe${row.clotheid}`);
-
-            // img要素を作成
-            const img = document.createElement('img');
-            img.src = row.clotheimage;
-            img.alt = row.clotheid;
+            checkbox.value = `${img.src}`;
 
             // labelにimgを追加
             label.appendChild(img);
@@ -35,7 +36,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             imageItem.appendChild(label);
 
             // galleryにimageItemを追加
-            console.log(imageItem);
             gallery.appendChild(imageItem);
         });
     // } catch (err) {
@@ -55,7 +55,11 @@ submitButton.addEventListener('click', () => {
 
     //チェックされた画像の値(value)を取得
     document.querySelectorAll('input[name="selectImages"]:checked').forEach((checkbox) => {
-        selectImages.push(checkbox.value);
+        const childArray = [];
+        childArray.push(checkbox.id);
+        childArray.push(checkbox.value);
+        selectImages.push(childArray);
+        console.log(selectImages);
     });
 
     if (selectImages.length === 0) {
@@ -68,22 +72,24 @@ submitButton.addEventListener('click', () => {
         return;
     }
 
-    //選択された画像を表示（デバック用）
-    // console.log('選択された画像：', selectImages);
-
     //フォームを作成してデータ送信
     const form = document.createElement('form');
     form.method = 'GET';
     form.action = 'coordinate_cfm.html';
-    
 
     //選択された画像をhidden inputとして追加
     selectImages.forEach((image) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'selectImages';
-        input.value = image;
-        form.appendChild(input);
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'selectImageId';
+        idInput.value = image[0];
+        form.appendChild(idInput);
+        
+        const pathInput = document.createElement('input');
+        pathInput.type = 'hidden';
+        pathInput.name = 'selectImagePath';
+        pathInput.value = image[1];
+        form.appendChild(pathInput);
     });
 
     //コーディネート名をhidden inputとして追加

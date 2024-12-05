@@ -67,6 +67,19 @@ const credentials = { key: privateKey, cert: certificate };
   // / HTTPサーバー作成 //
 // / HTTPS設定 //
 
+// Auth設定 //
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'トークンが必要です' });
+
+  jwt.verify(token, JWT_KEY, (err, user) => {
+    if (err) return res.status(403).json({ error: 'トークンが無効です' });
+    req.user = user;
+    next();
+  });
+};
+// / 設定 //
+
 // PostgreSQLデータベースへの接続情報を設定
 const client = new Client({
   user: process.env.DB_USER,
@@ -134,8 +147,11 @@ app.post('/add-user', async (req, res) => {
     `;
     const result = await client.query(insertQuery, [userId, userName, email, hashedPassword]);
     // const token = jwt.sign({ id: userId, email: email }, JWT_KEY, { expiresIn: '1h' });
-
-    res.status(201).json({ message: `ユーザー登録に成功しました: ${result.rows[0].userid}` });
+    
+    res.status(201).json({
+      message: `ユーザー登録に成功しました: ${result.rows[0].userid}`,
+      // token
+    });
   } catch (error) {
     console.error('ユーザー登録エラー:', error);
 
@@ -162,9 +178,13 @@ app.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'パスワードが間違っています' });
     }
 
-    // const token = jwt.sign({ id: userId, email: result.row[0].email }, JWT_KEY, { expiresIn : '1h' })
+    // const token = jwt.sign({ id: userId, email: user.email }, JWT_KEY, { expiresIn : '1h' })
     // ログイン成功時のレスポンス
-    res.json({ message: 'ログイン成功', userName: user.username });
+    res.json({
+      message: 'ログイン成功',
+      userName: user.username,
+      // token
+    });
   } catch (error) {
     console.error('ログインエラー:', error);
     res.status(500).json({ error: 'ログイン中にエラーが発生しました' });
@@ -173,13 +193,9 @@ app.post('/login', async (req, res) => {
 
 
 app.get('/logined', async (req, res) => {
-  // const token = req.headers['authorization'];
-  //   if (!token) return res.status(403).send("Token is required");
+  const { userId } = req.body;
+  console.log(req);
 
-  //   jwt.verify(token, SECRET_KEY, (err, decoded) => {
-  //       if (err) return res.status(401).send("Invalid token");
-  //       res.send(`Hello, user ${decoded.email}`);
-  //   });
   try {
     // clothesテーブルとcoordinateテーブルからデータを取得
     const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
@@ -196,24 +212,16 @@ app.get('/logined', async (req, res) => {
       ;
       `;
 
-      let clothesResult = "", coordinateResult = "";
-      
-      try {
-        clothesResult = await client.query(clothesQuery);
-      } catch (err) {
-        console.log(err);
-      }
-      
-      try {
-        coordinateResult = await client.query(coordinatesQuery);
-      } catch (err) {
-        console.log(err);
-      }
-      
+      const [clothesResult, coordinatesResult] = await Promise.all([
+        client.query(clothesQuery),
+        client.query(coordinatesQuery),
+      ]);
+  
       res.json({
         clothes: clothesResult.rows,
-        coordinates: coordinateResult.rows || ""
+        coordinates: coordinatesResult.rows || []
       });
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Database error');
@@ -424,7 +432,7 @@ app.post('/registerClothe', async (req, res) => {
   }
 });
 
-app.post('/getClotheTag', async (req, res) => {
+app.post('/getClothe', async (req, res) => {
   
   try {
     const clotheId = req.body.clotheId;
