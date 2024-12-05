@@ -1,7 +1,16 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // try {
+
+        const token = localStorage.getItem('token');
+
         // JSONデータを取得
-        const response = await fetch('/getClotheAll');
+        const response = await fetch('/getClotheAll', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
         const data = await response.json();
         
         // タグをHTMLに表示
@@ -59,7 +68,6 @@ submitButton.addEventListener('click', () => {
         childArray.push(checkbox.id);
         childArray.push(checkbox.value);
         selectImages.push(childArray);
-        console.log(selectImages);
     });
 
     if (selectImages.length === 0) {

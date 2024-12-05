@@ -1,0 +1,71 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+}
+
+
+#error {
+    color: red;
+}
+
+#image img {
+    display:inline-block;
+    margin: 10px;
+    max-width: 200px;
+    height: auto;
+}
+
+/* buttonタグのリセットCSS（不要な場合、セレクタごと削除してください） */
+button {
+    padding: 0;
+    font-family: inherit;
+    appearance: none;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    
+  }
+
+label {
+    padding-right: 20px;
+    padding-left: 20px;
+}
+  
+  /* ボタンのスタイル */
+  #generate-button {
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 320px;
+    height: 64px;
+    padding: 8px 24px;
+    margin-top: 50px;
+    font-family: sans-serif;
+    font-size: 16px;
+    color: #fff;
+    text-align: center;
+    overflow-wrap: anywhere;
+    background-color: #6fa24a;
+    border-radius: 32px; /* (buttonの高さ / 2) の値 */
+    
+  }
+
+  #gender-check{
+    padding: 10px;
+    margin-left: 35%;
+    margin-right: 35%;
+    border: 1px solid;
+    border-radius: 10px;
+  }
+  
+  @media (any-hover: hover) {
+    .buttonRound {
+      transition: background-color 0.2s;
+    }
+  
+    .buttonRound:hover {
+      background-color: #54802f;
+    }
+  }

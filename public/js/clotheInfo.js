@@ -9,10 +9,13 @@ window.onload = async () => {
     
     if (imageId) {
         try {
+            const token = localStorage.getItem('token');
+
             const response = await fetch('/getClothe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(formdata)
             });

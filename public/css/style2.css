@@ -296,3 +296,7 @@ body.drawer-open .main-content {
   transform: rotate(90deg); /* ボタンを90度回転 */
   background-color: #ff5f5f; /* 背景色を変更 */
 }
+
+#loginUser {
+  font-size: 25px;
+}

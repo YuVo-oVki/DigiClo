@@ -1,48 +1,36 @@
-/// 位置情報を取得
-function getWeather() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const latitude = position.coords.latitude; // 緯度
-        const longitude = position.coords.longitude; // 経度
-  
-        console.log(`取得した緯度: ${latitude}, 経度: ${longitude}`);
-  
-        // サーバーに天気情報をリクエスト
-        const response = await fetch('/get-weather', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ latitude, longitude })
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-  
-          // 天気情報を表示
-          let weatherHtml = `<h2>天気予報</h2>`;
-            
-          weatherHtml += `<div><p>○${data.date}の天気情報</p>`
-          weatherHtml += `<p>天気: ${data.weather}</p>`
-          weatherHtml += `<p>気温: ${data.temp}°C</p>`
-          weatherHtml += `<p>湿度: ${data.humid}</p>`
-          weatherHtml += `<p>風速: ${data.wind}</p><br><div>`
-        //   Object.keys(data).map(forecast => {
-        // });
-  
-          // 必要ならHTMLに表示
-          document.getElementById("weather").innerHTML = weatherHtml;
-        } else {
-          document.getElementById("weather").innerHTML = '天気情報の取得に失敗しました。';
-        }
-      }, (error) => {
-        console.error("位置情報の取得に失敗しました:", error);
+async function fetchOutfit() {
+    try {
+      //ボタンから性別の取得
+      const gender = document.querySelector('input[name="gender"]:checked').value;
+
+      //サーバーのエンドポイントにリクエスト
+      const response = await fetch(`/get-outfit?gender=${gender}`);  
+      const data = await response.json();
+
+      //天気情報と気温の表示
+      document.getElementById('weather').innerHTML = `
+          <p>天気: ${data.weather}</p>
+          <p>気温: ${data.temp}°C</p>
+          <p>オススメの服装:${data.keyword}</p>
+      `;
+
+      //画像を表示
+      const imagesContainer = document.getElementById('image');
+      imagesContainer.innerHTML = ''; //既存の内容をクリア
+      data.imageUrls.forEach((url, index) => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `服装の提案${data.keyword} ${index + 1}`;
+        img.style.margin = '10px';
+        img.style.maxWidth = '200px'
+        imagesContainer.appendChild(img);
       });
-    } else {
-      console.error("このブラウザでは位置情報が利用できません。");
+    } catch (error){
+      //エラー
+      document.getElementById('error').innerText = "Error fetching outfit data. Please try again";
+      console.error('Error',error);
     }
   }
   
-// ページ読み込み時に天気を取得
-window.onload = getWeather;
-  
+  //生成ボタンをクリックにfechOutfitを実行する
+  document.getElementById('generate-button').addEventListener('click', fetchOutfit);

@@ -46,9 +46,12 @@ document.getElementById('userMakeForm').addEventListener('submit', async (e) => 
         },
         body: JSON.stringify({ userId, userName, email, password })
       });
-  
       const data = await response.json();
+
       if (response.ok) {
+        const token = data.token;  // サーバーから返されたJWTトークン
+        localStorage.setItem('token', token); 
+
         alert(data.message);
         window.location.href = '/logined.html';  // 登録成功後にリダイレクト
       } else {
@@ -69,13 +72,17 @@ document.getElementById('userLoginForm').addEventListener('submit', async (e) =>
     try {
       const response = await fetch('/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ userId, password }),
       });
   
       const data = await response.json();
   
       if (response.ok) {
+        const token = data.token;  // サーバーから返されたJWTトークン
+        localStorage.setItem('token', token); 
         // ログイン成功時
         alert(data.message);
         // ログイン後、例えば、ユーザー名を表示するか、ホームページにリダイレクトする

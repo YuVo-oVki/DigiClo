@@ -80,8 +80,12 @@ function confirmImage() {
         formData.append('image', file);  // 'image'という名前で画像データを追加
 
         // 画像をサーバーに送信
+        const token = localStorage.getItem('token');
         fetch('/tag', {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
             body: formData
         })
         .then(response => {
@@ -92,7 +96,7 @@ function confirmImage() {
         })
         .then(data => {
             // サーバーからのレスポンス（例: 成功メッセージや解析結果）
-            console.log('サーバーからのレスポンス:', data);
+            // console.log('サーバーからのレスポンス:', data);
             // 必要に応じて、レスポンスに基づいて何かを表示する
             // if (data.success) {
                 alert('画像のアップロードが成功しました！');

@@ -48,18 +48,18 @@ window.onload = function() {
         selectImageId.forEach(id => {
             id = id.replace('clothe', '');
             formdata.push({
-                userId: 'MCGDev',
                 clotheId: id,
                 coordinateName: coordinateName
             });
         });
 
-        console.log(formdata);
+        const token = localStorage.getItem('token');
 
             await fetch('/registerCoordinate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(formdata)
             })

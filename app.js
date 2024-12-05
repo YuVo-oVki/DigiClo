@@ -68,16 +68,23 @@ const credentials = { key: privateKey, cert: certificate };
 // / HTTPS設定 //
 
 // Auth設定 //
-const authenticateToken = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'トークンが必要です' });
-
-  jwt.verify(token, JWT_KEY, (err, user) => {
-    if (err) return res.status(403).json({ error: 'トークンが無効です' });
-    req.user = user;
-    next();
-  });
+// JWTを検証するミドルウェア
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];  // "Bearer <token>" の形式
+  if (token) {
+    jwt.verify(token, JWT_KEY, (err, user) => {
+      if (err) {
+        return res.sendStatus(403);  // トークンが無効の場合
+      }
+      req.user = user;  // トークン内のデータを req.user に設定
+      next();  // 次のミドルウェアへ進む
+    });
+  } else {
+    res.sendStatus(401);  // トークンがない場合
+  }
 };
+
+module.exports = verifyToken;
 // / 設定 //
 
 // PostgreSQLデータベースへの接続情報を設定
@@ -133,28 +140,30 @@ app.post('/add-user', async (req, res) => {
     let emailResult = await client.query(emailQuery, [email]);
 
     if (userIdResult.rows[0].exists) {
-      res.status(500).json({ error: 'IDが使われています' });
+      return res.status(400).json({ error: 'IDが使われています' });
     } else if (emailResult.rows[0].exists) {
-      res.status(500).json({ error: 'Emailが使われています' });
+      return res.status(400).json({ error: 'Emailが使われています' });
     } else {
-      res.status(500).json({ error: 'ユーザー登録に失敗しました' });
+      // データベースにユーザーを挿入
+      const insertQuery = `
+        INSERT INTO users (UserID, UserName, Email, password)
+        VALUES ($1, $2, $3, $4)
+        RETURNING UserID;
+      `;
+      const result = await client.query(insertQuery, [userId, userName, email, hashedPassword]);
+
+      const token = jwt.sign(
+        { userId: userId, userName: userName, email: email, password: hashedPassword },
+        JWT_KEY,
+        { expiresIn: '1h' });
+      res.status(201).json({
+        message: `ユーザー登録に成功しました: ${result.rows[0].userid}`,
+        token
+      });
     }
-    // データベースにユーザーを挿入
-    const insertQuery = `
-      INSERT INTO users (UserID, UserName, Email, password)
-      VALUES ($1, $2, $3, $4)
-      RETURNING UserID;
-    `;
-    const result = await client.query(insertQuery, [userId, userName, email, hashedPassword]);
-    // const token = jwt.sign({ id: userId, email: email }, JWT_KEY, { expiresIn: '1h' });
-    
-    res.status(201).json({
-      message: `ユーザー登録に成功しました: ${result.rows[0].userid}`,
-      // token
-    });
   } catch (error) {
     console.error('ユーザー登録エラー:', error);
-
+    res.status(500).json({ error: 'ユーザー登録中にエラーが発生しました' });
   }
 });
 
@@ -178,12 +187,14 @@ app.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'パスワードが間違っています' });
     }
 
-    // const token = jwt.sign({ id: userId, email: user.email }, JWT_KEY, { expiresIn : '1h' })
+    const token = jwt.sign(
+      { userId: user.userid, Email: user.email, userName: user.username, password: user.password },
+      JWT_KEY,
+      { expiresIn : '1h' })
     // ログイン成功時のレスポンス
     res.json({
       message: 'ログイン成功',
-      userName: user.username,
-      // token
+      token
     });
   } catch (error) {
     console.error('ログインエラー:', error);
@@ -191,44 +202,40 @@ app.post('/login', async (req, res) => {
   }
 });
 
-
-app.get('/logined', async (req, res) => {
-  const { userId } = req.body;
-  console.log(req);
-
+app.get('/logined', verifyToken, async (req, res) => {
   try {
-    // clothesテーブルとcoordinateテーブルからデータを取得
-    const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
-    const coordinatesQuery = `
-      SELECT coordinateid, coordinatename, clotheimage
-      FROM (SELECT 
-      co.coordinateID,
-      co.coordinatename,
-      c.clotheimage,
-      ROW_NUMBER() OVER (PARTITION BY co.coordinateID ORDER BY c.clotheID) AS rn
-      FROM coordinate co
-      JOIN clothes c ON co.clotheID = c.clotheID)
-      WHERE rn = 1;
-      ;
+      const { userId, userName } = req.user;
+
+      const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes WHERE userid = $1 ORDER BY clotheid;';
+      const coordinatesQuery = `
+          SELECT coordinateid, coordinatename, clotheimage
+          FROM (SELECT 
+              co.coordinateID,
+              co.coordinatename,
+              c.clotheimage,
+              ROW_NUMBER() OVER (PARTITION BY co.coordinateID ORDER BY c.clotheID) AS rn
+              FROM coordinate co
+              JOIN clothes c ON co.clotheID = c.clotheID AND co.userid = c.userid
+              WHERE co.userid = $1)
+          WHERE rn = 1;
       `;
 
-      const [clothesResult, coordinatesResult] = await Promise.all([
-        client.query(clothesQuery),
-        client.query(coordinatesQuery),
-      ]);
-  
-      res.json({
-        clothes: clothesResult.rows,
-        coordinates: coordinatesResult.rows || []
-      });
+      const clothesResult = await client.query(clothesQuery, [userId]);
+      const coordinatesResult = await client.query(coordinatesQuery, [userId]);
 
+      res.json({
+          clothes: clothesResult.rows,
+          coordinates: coordinatesResult.rows,
+          userName: userName
+      });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Database error');
+      console.error(err);
+      res.status(500).send('Database error');
   }
 });
-  
-  app.post('/selectImage', (req, res) => {
+
+
+  app.post('/selectImage', verifyToken, (req, res) => {
     const imageId = req.body.imageId;
     const kind = req.body.kind;
   
@@ -241,29 +248,31 @@ app.get('/logined', async (req, res) => {
     }
   });
 
-  app.get('/search', async (req, res) => {
+  app.get('/search', verifyToken, async (req, res) => {
     
   try {
+    const { userId, userName } = req.user;
     const target = req.query.tag;
-
     let clothesQuery = '';
     let clothesResult = '';
     let val = [];
     
     // clothesテーブルとcoordinateテーブルからデータを取得
-    if (target) {
-      clothesQuery =
-      `SELECT clotheid, clotheimage, clothetag
-      FROM clothes WHERE clothetag LIKE $1 ORDER BY clotheid;`;
-      val = [`%${target}%`]
-    } else {
-      clothesQuery = 'SELECT clotheid, clotheimage, clothetag FROM clothes;';
-    }
-
     try {
-      clothesResult = await client.query(clothesQuery, val);
+      if (target) {
+        clothesQuery =
+        `SELECT clotheid, clotheimage, clothetag
+        FROM clothes WHERE userid = $1 AND clothetag LIKE $2 ORDER BY clotheid;`;
+        val = `%${target}%`
+        clothesResult = await client.query(clothesQuery, [userId, val]);
+      } else {
+        clothesQuery = 'SELECT clotheid, clotheimage, clothetag FROM clothes WHERE userid = $1;';
+        clothesResult = await client.query(clothesQuery, [userId]);
+      }
+
       res.json({
-        clothes: clothesResult.rows
+        clothes: clothesResult.rows,
+        userName: userName
       });
     } catch (err) {
       console.error(err);
@@ -278,6 +287,7 @@ app.get('/logined', async (req, res) => {
 app.post('/tag', upload.single('image'), async (req, res) => {
 
   try {
+
     if (!req.file){
       res.status(400).send('No file uploaded or file is too large');
     }
@@ -322,7 +332,6 @@ app.post('/tag', upload.single('image'), async (req, res) => {
             if (response.status.code !== 10000) {
               reject('Clarifai API error: ' + response.status.description);
             }
-    
             
             const colorArray = response.outputs[0].data.colors;
             const colorRes = colorArray.map(color => color.w3c.name);
@@ -386,16 +395,17 @@ async function removeBackground(imagePath) {
       
     fs.writeFileSync(outputPath, response.data);
     return outputPath; //背景除去した画像のパスを返す
-  } catch (error){
+  } catch (error) {
     const errorMessage = error.response ? error.response.data : error.message;
     console.error('Remove.bg APIのエラー:', errorMessage);
     throw new Error('背景除去に失敗しました');
   }
 }
 
-app.post('/registerClothe', async (req, res) => {
+app.post('/registerClothe', verifyToken, async (req, res) => {
   
   try {
+    const { userId } = req.user;
     const { imgPath, tags } = req.body; // リクエストからデータ取得
 
     
@@ -403,8 +413,8 @@ app.post('/registerClothe', async (req, res) => {
       return res.status(400).json({ error: 'Missing imgPath or tags' });
     }
     
-    const selectQuery = `SELECT clotheid FROM "clothes" ORDER BY clotheid`;
-    const result = await client.query(selectQuery);
+    const selectQuery = `SELECT clotheid FROM clothes WHERE userid = $1 ORDER BY clotheid`;
+    const result = await client.query(selectQuery, [userId]);
     
     const clotheArray = result.rows.length;
 
@@ -420,11 +430,10 @@ app.post('/registerClothe', async (req, res) => {
     }
 
     const insertQuery = `
-      INSERT INTO clothes(clotheid, clothetag, clotheimage, fav, userid)
-      VALUES ($1, $2, $3, $4, $5)
-      `;   
-    const flg = false, userId = 'MCGDev';     
-    client.query(insertQuery, [insertId, tags, imgPath, flg, userId]);
+      INSERT INTO clothes(clotheid, clothetag, clotheimage, userid)
+      VALUES ($1, $2, $3, $4)
+      `;
+    client.query(insertQuery, [insertId, tags, imgPath, userId]);
     
     res.json({status: "ok"});
   } catch (error) {
@@ -432,17 +441,22 @@ app.post('/registerClothe', async (req, res) => {
   }
 });
 
-app.post('/getClothe', async (req, res) => {
+app.post('/getClothe', verifyToken, async (req, res) => {
   
   try {
+    const userId = req.user.userId;
     const clotheId = req.body.clotheId;
+
     // clothesテーブルとcoordinateテーブルからデータを取得
-    const clothesQuery = 'SELECT clotheid, clotheTag, clotheimage FROM clothes WHERE clotheid = $1;';
+    const clothesQuery = `
+      SELECT clotheid, clotheTag, clotheimage FROM clothes
+      WHERE userid = $1 AND clotheid = $2;
+    `;
     
     let clotheTag = "", image = "";
     
     try {
-      const clothesResult = await client.query(clothesQuery, [clotheId]);
+      const clothesResult = await client.query(clothesQuery, [userId, clotheId]);
       if (clothesResult.rows.length === 0) {
         res.status(404).json({ error: "Clothe not found" });
         return;
@@ -460,38 +474,40 @@ app.post('/getClothe', async (req, res) => {
   }
 });
 
-app.post('/editTag', async (req, res) => {
+app.post('/editTag', verifyToken, async (req, res) => {
   
   try {
+    const { userId } = req.user;
     const { clotheid, tags } = req.body;
 
-    if (!clotheid || !tags) {
-      return res.status(400).json({ error: 'Missing clotheID or tags' });
+    if (!userId || !clotheid || !tags) {
+      return res.status(400).json({ error: 'Missing userID or clotheID or tags' });
     }
     
     let result = "";
 
     try {
-      const updateQuery = `UPDATE clothes SET clothetag = $1 WHERE clotheid = $2`;
-      result = await client.query(updateQuery, [tags, clotheid]);
+      const updateQuery = `UPDATE clothes SET clothetag = $1 WHERE userid = $2 AND clotheid = $3`;
+      result = await client.query(updateQuery, [tags, userId, clotheid]);
     } catch (err) {
       console.log("clothesに登録されていません。")
     }
-    res.json({ status: result });
+    res.json({ status: "ok" });
   } catch (error) {
     console.log("エラーが発生しました: ", error);
   }
 });
 
-app.post('/deleteClothe', async(req, res) => {
+app.post('/deleteClothe', verifyToken, async(req, res) => {
   
-  const { clotheId } = req.body;
-
+  
   try {
-    const selectQuery = 'SELECT clotheimage FROM clothes WHERE clotheid = $1';
-    const deleteQuery = 'DELETE FROM clothes WHERE clotheid = $1';
-    const clotheResult = await client.query(selectQuery, [clotheId]);
-    await client.query(deleteQuery, [clotheId]);
+    const { clotheId } = req.body;
+    const { userId } = req.user;
+    const selectQuery = 'SELECT clotheimage FROM clothes WHERE userid = $1 AND clotheid = $2';
+    const deleteQuery = 'DELETE FROM clothes WHERE userid = $1 AND clotheid = $2';
+    const clotheResult = await client.query(selectQuery, [userId, clotheId]);
+    await client.query(deleteQuery, [userId, clotheId]);
 
     const deleteFile = (filePath) => {
       fs.unlink(filePath, (err) => {
@@ -514,19 +530,22 @@ app.post('/deleteClothe', async(req, res) => {
   }
 }); 
 
-app.get('/getClotheAll', async (req, res) => {
+app.get('/getClotheAll', verifyToken, async (req, res) => {
   
   try {
+    const { userId } = req.user;
     // clothesテーブルとcoordinateテーブルからデータを取得
-    const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
+    const clothesQuery = `
+      SELECT clotheid, clotheimage FROM clothes
+      WHERE userid = $1 ORDER BY clotheid;
+    `;
     let clothesResult = "";
     
     try {
-      clothesResult = await client.query(clothesQuery);
+      clothesResult = await client.query(clothesQuery, [userId]);
     } catch (err) {
       console.log(err);
     }
-    
     
     res.json({ rows: clothesResult.rows });
   } catch (err) {
@@ -535,21 +554,24 @@ app.get('/getClotheAll', async (req, res) => {
   }
 });
 
-app.post('/registerCoordinate', async (req, res) => {
+app.post('/registerCoordinate', verifyToken, async (req, res) => {
   try {
+    const { userId } = req.user;
+    const selectQuery = `SELECT DISTINCT(coordinateid) FROM coordinate WHERE userid = $1;`;
+    const result = await client.query(selectQuery, [userId]);
     
-    // coordinateIDの決定
-    const userId = req.body[0].userId;
-    const selectQuery = `SELECT userid, max(coordinateid) as coordinateid FROM coordinate WHERE userid = $1 GROUP BY userid;`;
-    const selectResult = await client.query(selectQuery, [userId]);
-    
-    let newCoordinateId = "";
-    try  {
-      const coordinateId = selectResult.rows[0].coordinateid;
-        newCoordinateId = coordinateId + 1;
-      } catch (err) {
-        newCoordinateId = 1;
+    const clotheArray = result.rows.length;
+
+    let insertId = 1;
+    try {
+      for (let i = 1; i <= clotheArray; i++) {
+        if (insertId == result.rows[i - 1].coordinateid) {
+          insertId += 1;
+        }
       }
+    } catch (err) {
+      console.log("clothesになにも登録されていないかDBに接続できていません。")
+    }
     
       // 保存先DBに対するINSERT INTOクエリ
       const insertQuery = `
@@ -557,10 +579,9 @@ app.post('/registerCoordinate', async (req, res) => {
       VALUES ($1, $2, $3, $4);
       `;
       
-      
       for (let i = 0; i < req.body.length; i++) {
-        let { userId, clotheId, coordinateName } = req.body[i];
-        await client.query(insertQuery, [userId, newCoordinateId, clotheId, coordinateName]);
+        let { clotheId, coordinateName } = req.body[i];
+        await client.query(insertQuery, [userId, insertId, clotheId, coordinateName]);
       }
       res.json({ status: 'ok' });
     } catch (err) {
@@ -569,47 +590,164 @@ app.post('/registerCoordinate', async (req, res) => {
     }
   });
 
-  app.post('/getCoordinateInfo', async (req, res) => {
-    const coorId = req.body.coordinateId;
+app.post('/getCoordinateInfo', verifyToken, async (req, res) => {
+  const coorId = req.body.coordinateId;
+  
+  try {
+    const { userId } = req.user;
+    // clothesテーブルとcoordinateテーブルからデータを取得
+    const clothesQuery = `
+      SELECT clothes.clotheid, clotheimage, coordinatename FROM clothes
+      INNER JOIN coordinate
+      ON clothes.clotheid = coordinate.clotheid AND clothes.userid = coordinate.userid
+      WHERE clothes.userid = $1 AND coordinateid = $2;
+    `;
+    let clothesResult = "";
     
     try {
-      // clothesテーブルとcoordinateテーブルからデータを取得
-      const clothesQuery = `
-        SELECT clothes.clotheid, clotheimage, coordinatename FROM clothes
-        INNER JOIN coordinate
-        ON clothes.clotheid = coordinate.clotheid
-        WHERE coordinateid = $1;
-      `;
-      let clothesResult = "";
-      
-      try {
-        clothesResult = await client.query(clothesQuery, [coorId]);
-      } catch (err) {
-        console.log(err);
-      }
-      
-      res.json({ rows: clothesResult.rows });
+      clothesResult = await client.query(clothesQuery, [userId, coorId]);
     } catch (err) {
-      console.error(err);
-      res.status(500).json('Database error');
+      console.log(err);
     }
-  });
-  
-  app.post('/deleteCoordinate', async(req, res) => {
     
-    const { coordinateId } = req.body;
-    console.log(coordinateId)
-  
-    try {
-      const deleteQuery = 'DELETE FROM coordinate WHERE coordinateid = $1';
-      await client.query(deleteQuery, [coordinateId]);
+    res.json({ rows: clothesResult.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json('Database error');
+  }
+});
 
-      res.json({ status: "ok" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).send('Deletion error');
-    }
-  }); 
+app.post('/deleteCoordinate', verifyToken, async(req, res) => {
+  
+  const { coordinateId } = req.body;
+  
+  try {
+    const { userId } = req.user;
+    const deleteQuery = 'DELETE FROM coordinate WHERE userid = $1 AND coordinateid = $2';
+    await client.query(deleteQuery, [userId, coordinateId]);
+
+    res.json({ status: "ok" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Deletion error');
+  }
+}); 
+
+async function getWeather(city) {
+  // const apiKey = process.env.WEATHER_API_KEY;
+  const apiKey = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric&lang=ja`;
+
+  try {
+    const response = await axios.get(url);
+    const weather = response.data.weather[0].main;  //天気情報
+    const temp = response.data.main.temp; //気温
+    const timestamp = response.data.dt; //現在のタイムスタンプ
+    const month = new Date(timestamp * 1000).getMonth() + 1; //月を取得
+    return { weather, temp, month };
+  } catch (error) {
+    console.error("Error fetching weather data:", error.message);
+    throw new Error("天気データを取得できませんでした。");
+  }
+}
+
+// 天気の英語を日本語に変換する関数
+function translateWeather(weather) {
+  switch (weather) {
+    case 'Clear':
+      return '晴れ';
+    case 'Clouds':
+      return '曇り';
+    case 'Rain':
+      return '雨';
+    case 'Snow':
+      return '雪';
+    case 'Thunderstorm':
+      return '雷雨';
+    case 'Drizzle':
+      return '小雨';
+    case 'Mist':
+      return '霧';
+    default:
+      return '不明';  // 未対応の天気
+  }
+}
+
+// コーディネート用のキーワードを生成する関数
+function generateKeyword(weather, month, gender) {
+  let baseKeyword;
+
+  if (weather && weather.main && weather.main.includes('Rain')) {
+    baseKeyword = '雨の日 ファッション';
+  } else if (month >= 3 && month <= 5) {
+    baseKeyword = '春 トレンド ファッション';
+  } else if (month >= 6 && month <= 8) {
+    baseKeyword = '夏 トレンド ファッション';
+  } else if (month >= 9 && month <= 11) {
+    baseKeyword = '秋 トレンド ファッション';
+  } else if (month >= 12 || month <= 2) {
+    baseKeyword = '冬 トレンド ファッション';
+  }
+
+  // baseKeyword が未設定の場合、デフォルト値を返す
+  if (!baseKeyword) {
+    baseKeyword = 'カジュアル ファッション'; // デフォルトのキーワード
+  }
+
+  // 性別によるキーワード調整
+  if (gender === 'female') {
+    return `${baseKeyword} 女性`;
+  } else if (gender === 'male') {
+    return `${baseKeyword} 男性`;
+  }
+  return baseKeyword; // デフォルト 
+}
+
+// 画像検索を行う関数
+async function searchImages(keyword) {
+  const apiKey = process.env.BING_API_KEY;
+  const url = `https://api.bing.microsoft.com/v7.0/images/search?q=${encodeURIComponent(keyword)}&count=3&setLang=ja`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: { 'Ocp-Apim-Subscription-Key': apiKey },
+    });
+    const imageUrls = response.data.value.map(img => img.contentUrl);  //複数の画像URL
+    return imageUrls;
+  } catch (error) {
+    console.error("Error fetching image:", error.message);
+    throw new Error("画像を取得できませんでした。");
+  }
+}
+
+// APIエンドポイントの設定
+app.get('/get-outfit', async (req, res) => {
+  const city = process.env.CITY || 'Tokyo';
+  const gender = req.query.gender || 'female'; //デフォルト
+
+  try {
+    // 天気データを取得
+    const weatherData = await getWeather(city);
+
+    // 天気情報の翻訳
+    const weatherInJapanese = translateWeather(weatherData.weather);
+
+    // キーワード生成
+    const keyword = generateKeyword(weatherData.weather, weatherData.month, gender);
+
+    // 画像検索
+    const imageUrls = await searchImages(keyword);
+
+    // レスポンスとして返す
+    res.json({
+      weather: weatherInJapanese,
+      temp: weatherData.temp,
+      keyword,
+      imageUrls,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // 緯度と経度を受け取るルート
 app.post('/get-weather', (req, res) => {
@@ -638,7 +776,7 @@ app.post('/get-weather', (req, res) => {
 
   const url1h = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric&lang=ja`;
 
-  // 天d気データの取得
+  // 天気データの取得
   https.get(url1h, (response) => {
     let data = '';
   

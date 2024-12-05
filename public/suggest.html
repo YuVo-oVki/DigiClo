@@ -3,11 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天気情報</title>
+    <title>Weather-based Outfit</title>
+    <link rel="stylesheet" href="css/weather.css">
 </head>
 <body>
-    <h1>現在の天気</h1>
-    <div id="weather">天気情報を取得中...</div>
+    <h1>コーディネート提案</h1>
+
+    <!-- 性別の選択ボタン -->
+    <div id="gender-check">
+      <label>
+        <input type="radio" name="gender" value="female" checked>
+        女性
+      </label>
+      <label>
+        <input type="radio" name="gender" value="male">
+        男性
+      </label>
+    </div>
+
+    <!-- 画像生成ボタン -->
+    <button id="generate-button">コーディネートを生成</button>
+
+    <!-- 結果の表示 -->
+    <div id="weather"></div>
+    <div id="image"></div>
+    <div id="error"></div>
+
     <script src="./js/suggest.js"></script>
 </body>
 </html>

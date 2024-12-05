@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', async () => {
    
     // JSONデータを取得
     const data = JSON.parse(localStorage.getItem('responseData'));
-    console.log('取得データ:', data);
 
     // // レスポンスのフォーマットをチェック
     // if (!data.labels || !data.colors) {
@@ -74,11 +73,12 @@ confBtn.addEventListener('click', async () => {
         tags: tags
     }
 
-    
+    const token = localStorage.getItem('token');
     fetch('/registerClothe', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data) // JSONとして送信
     })

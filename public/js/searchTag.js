@@ -9,8 +9,16 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (tag) {
     try {
 
-      const response = await fetch(`/search?tag=${encodeURIComponent(tag)}`);
+      const response = await fetch(`/search?tag=${encodeURIComponent(tag)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // トークンを必ず含める
+        }
+      });      
       const data = await response.json();
+
+      const loginUser = document.getElementById('loginUser');
+      loginUser.textContent = data.userName;
 
       // clothesデータを追加
       const filterableCards = document.getElementById('filterable-cards');

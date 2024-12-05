@@ -8,10 +8,12 @@ window.onload = async () => {
     
     if (imageId) {
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch('/getCoordinateInfo', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(formdata)
             });
@@ -87,10 +89,13 @@ function confirmDelete() {
         imageId = new URLSearchParams(window.location.search).get('imageId');
         const formdata = { coordinateId : imageId }; 
         
+        const token = localStorage.getItem('token');
+
         fetch('/deleteCoordinate', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(formdata)
         })

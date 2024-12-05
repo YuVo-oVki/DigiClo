@@ -1,12 +1,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
-    const clotheid = sessionStorage.getItem('id');;
+    const token = localStorage.getItem('token'); 
+    const clotheid = sessionStorage.getItem('id');
     const formdata = { clotheId : clotheid };
 
-    fetch('/getClothe', {
+    await fetch('/getClothe', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formdata)
     })
@@ -76,10 +78,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         tags: tags
     }
     
+    const token = localStorage.getItem('token'); 
+    
     fetch('/editTag', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data) // JSONとして送信
     })

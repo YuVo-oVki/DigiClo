@@ -1,131 +1,146 @@
-// 片岡優樹・酒井淳之介
-
 console.clear();
 
 document.addEventListener("DOMContentLoaded", async function () {
+    const token = localStorage.getItem('token');  // トークン取得
 
-  try {
-    // サーバーからデータを取得
-    const response = await fetch('/logined');
-    const data = await response.json();
+    if (!token) {
+        console.error('トークンがありません。');
+        return;
+    }
 
-    // clothesデータを追加
+    try {
+        // サーバーからデータを取得
+        const response = await fetch('/logined', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (!data.clothes && !data.coordinates) {
+            console.error('データがありません');
+            return;
+        }
+        
+        renderClothes(data.clothes);
+        renderCoordinates(data.coordinates);
+        
+        const loginUser = document.getElementById("loginUser");
+        loginUser.textContent = data.userName;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+
+    // セレクトボックスの変更イベント
+    const selectElement = document.getElementById("change");
+    selectElement.addEventListener("change", function () {
+        const selectedValue = this.value;
+        const cards = document.getElementsByClassName("card");
+        for (let card of cards) {
+            card.style.display = card.getAttribute("kind") === selectedValue ? "flex" : "none";
+        }
+    });
+
+
+    // ページ読み込み時に初期化
+    selectElement.dispatchEvent(new Event("change"));
+
+    // 検索ボタンのクリックイベント
+    document.getElementById('searchButton').addEventListener('click', async () => {
+        const word = encodeURIComponent(document.getElementById('tagInput').value);
+
+        fetch(`/search_tag.html?tag=${word}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Search Results:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        window.location.href = `/search_tag.html?tag=${word}`;
+    });
+
+    // メニュー操作
+    const menuButton = document.getElementById('menuButton');
+    const drawerMenu = document.getElementById('drawerMenu');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+
+    menuButton.addEventListener('click', () => {
+        const isOpen = drawerMenu.classList.toggle('open');
+        drawerOverlay.classList.toggle('active');
+        menuButton.classList.toggle('active', isOpen);
+    });
+
+    drawerOverlay.addEventListener('click', () => {
+        drawerMenu.classList.remove('open');
+        drawerOverlay.classList.remove('active');
+        menuButton.classList.remove('active');
+    });
+});
+
+// カードのレンダリング
+function renderClothes(clothes) {
     const filterableCards = document.getElementById('filterable-cards');
-    
-    // Clothesセクションのカードを追加
-    data.clothes.forEach(cloth => {
-      const card = document.createElement('div');
-      card.classList.add('card', 'p-0');
-      card.setAttribute('kind', 'Clothe');
-      
-      const img = document.createElement('img');
-      img.src = cloth.clotheimage;
-      img.alt = "img";
-      img.onclick = function() {
-        goToClotheInfo(cloth.clotheid, this);
-      };
-      
-      card.appendChild(img);
-      filterableCards.appendChild(card);
+    clothes.forEach(cloth => {
+        const card = createCard('Clothe', cloth.clotheimage, () => goToClotheInfo(cloth.clotheid));
+        filterableCards.appendChild(card);
     });
+}
 
-    // Coordinateセクションのカードを追加
-    data.coordinates.forEach(coord => {
-      const card = document.createElement('div');
-      card.classList.add('card', 'p-0');
-      card.setAttribute('kind', 'Coordinate');
-      
-      const img = document.createElement('img');
-      img.src = coord.clotheimage;
-      img.alt = "img";
-      img.onclick = function() {
-        goToCoordinateInfo(coord.coordinateid, this);
-      };
-
-      const bg = document.createElement('div');
-      bg.classList.add('card-body');
-
-      const title = document.createElement('h6');
-      title.classList.add('card-title');
-      title.textContent = coord.coordinatename;
-      
-      card.appendChild(img);
-      card.appendChild(bg);
-      bg.appendChild(title);
-      filterableCards.appendChild(card);
+function renderCoordinates(coordinates) {
+    const filterableCards = document.getElementById('filterable-cards');
+    coordinates.forEach(coord => {
+        const card = createCard('Coordinate', coord.clotheimage, () => goToCoordinateInfo(coord.coordinateid), coord.coordinatename);
+        filterableCards.appendChild(card);
     });
-    
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-  const selectElement = document.getElementById("change"); // セレクトボックス
-  const cards = document.getElementsByClassName("card p-0"); // "card"クラスの要素を取得
-  let selectedValue = "";
+}
 
-  // セレクトボックスが変更されたときのイベントリスナー
-  selectElement.addEventListener("change", function () {
-      selectedValue = this.value; // 選択された値
+function createCard(kind, imageSrc, onClick, title = null) {
+    const card = document.createElement('div');
+    card.classList.add('card', 'p-0');
+    card.setAttribute('kind', kind);
 
-      // "card"クラスの要素をループして表示・非表示を切り替える
-      for (let card of cards) { // 動的リストなので、`for...of`でループ
-          if (card.getAttribute("kind") === selectedValue) {
-              card.style.display = "flex"; // 表示（元のスタイルに合わせる）
-          } else {
-              card.style.display = "none"; // 非表示
-          }
-      }
+    const img = document.createElement('img');
+    img.src = imageSrc;
+    img.alt = "img";
+    img.onclick = onClick;
 
-  });
+    card.appendChild(img);
 
-  // 衣服の詳細ページに遷移
-  function goToClotheInfo(imageId) {
+    if (title) {
+        const bg = document.createElement('div');
+        bg.classList.add('card-body');
 
-    formdata = { clotheId: imageId };
+        const titleElem = document.createElement('h6');
+        titleElem.classList.add('card-title');
+        titleElem.textContent = title;
 
-    fetch('/getClothe', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formdata)
-  })
-  .then(response => response.json()) // レスポンスをJSON形式に変換
-  .then(data => {
+        bg.appendChild(titleElem);
+        card.appendChild(bg);
+    }
 
-  })
-  .catch(error => console.error('Error:', error));
-    window.location.href = `./clothe_info.html?imageId=${imageId}`;
-  }
+    return card;
+}
 
-  // コーデの詳細ページに遷移
-  function goToCoordinateInfo(imageId) {
-    sessionStorage.setItem('id', imageId);
-    window.location.href = `./coordinate_info.html?imageId=${imageId}`;
-  }
-    
-  document.getElementById('searchButton').addEventListener('click', async () => {
-    const word = encodeURIComponent(document.getElementById('tagInput').value);
-    window.location.href = `/search_tag.html?tag=${word}`;
-  });
-  
-  // ページ読み込み時の初期表示
-  selectElement.dispatchEvent(new Event("change"));
-});
+function goToClotheInfo(clotheId) {
+    sessionStorage.setItem('id', clotheId);
+    window.location.href = `./clothe_info.html?imageId=${clotheId}`;
+}
 
-const menuButton = document.getElementById('menuButton');
-const drawerMenu = document.getElementById('drawerMenu');
-const drawerOverlay = document.getElementById('drawerOverlay');
- 
-// メニューを開閉するイベントリスナー
-menuButton.addEventListener('click', () => {
-    const isOpen = drawerMenu.classList.toggle('open');
-    drawerOverlay.classList.toggle('active');
-    menuButton.classList.toggle('active', isOpen); // ボタンの状態を切り替え
-});
- 
-// オーバーレイクリックでメニューを閉じる
-drawerOverlay.addEventListener('click', () => {
-    drawerMenu.classList.remove('open');
-    drawerOverlay.classList.remove('active');
-    menuButton.classList.remove('active'); // ボタンの状態をリセット
-});
+function goToCoordinateInfo(coordinateId) {
+    sessionStorage.setItem('id', coordinateId);
+    window.location.href = `./coordinate_info.html?imageId=${coordinateId}`;
+}
