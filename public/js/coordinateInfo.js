@@ -4,8 +4,7 @@ let imageId;
 window.onload = async () => {
     imageId = new URLSearchParams(window.location.search).get('imageId');
     const formdata = { coordinateId: imageId };
-    const imageContainer = document.getElementById('imageContainer');
-    const tag = document.getElementById('tagInfo');
+    const imageGallery = document.getElementById('imageGallery');
     
     if (imageId) {
         try {
@@ -23,19 +22,38 @@ window.onload = async () => {
 
             const data = await response.json();
             
-            const name = document.getElementById('coordinate_name');
-            name.textContent = data.rows[0].coordinatename;
+            const name = document.getElementById('coordinateName');
+            name.textContent = data.rows[0].coordinatename || '未入力';
+            let imgArray = [], currentIndex = 0, coordinateNum = 1;
 
-            console.log(data.rows);
-            
+            const mainImage = document.getElementById('mainImage');
+
             data.rows.forEach((row) => {
+                const imageItem = document.createElement('div');
+                imageItem.classList.add('image-item');
+                
                 const img = document.createElement('img');
-                // パスを使用して画像を表示
-                img.src = row.clotheimage; // サーバーから取得した画像パスを設定
-                img.alt = `Coordinate${imageId}`;
-                img.width = 300;
-                imageContainer.appendChild(img);
+                img.src = `${row.clotheimage}`; //画像パス
+                img.alt = `${row.coordinatename}_${coordinateNum}`;
+                
+                currentIndex += 1;
+                coordinateNum += 1;
+                imgArray.push(row.clotheimage);
+
+                imageItem.appendChild(img);
+                imageGallery.appendChild(imageItem);
             })
+
+            //1枚目の画像を表示
+            currentIndex = 0;
+            mainImage.src = `${imgArray[currentIndex]}`;
+            
+            //クリックしたら画像の切り替え
+            mainImage.addEventListener('click' , () => {
+                currentIndex = (currentIndex + 1) % imgArray.length; //次の画像へ最後まで行ったら1枚目へ
+                mainImage.src = `${imgArray[currentIndex]}`;
+                mainImage.alt = imgArray[currentIndex];
+            });
 
         } catch (error) {
             console.error('Error:', error);
@@ -49,12 +67,6 @@ window.onload = async () => {
 // 戻るボタン処理
 function goBack() {
     window.location.href = './logined.html'; // 元のページに戻る
-}
-
-function edit() {
-    sessionStorage.setItem('id', imageId);
-    sessionStorage.setItem('tag', document.getElementsByClassName('tagName'));
-    window.location.href = './clothe_tag_edit.html'
 }
 
 // 削除確認ダイアログを表示

@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     function submitImage(id) {
-      window.location.href = `./clothe_info.html?image=${id}`;
+      window.location.href = `./clothe_info.html?imageId=${id}`;
     }
   }
 });

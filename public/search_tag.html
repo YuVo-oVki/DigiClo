@@ -7,43 +7,42 @@
         <link rel="stylesheet" href="../css/style2.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
+        <script src="./js/script.js" defer></script>
 </head>
 <body>
     <div>
         <h1 id="title">DigiClo</h1>
     </div>
 
-    <div class="container">
-        <div id="Ribbon">
-            <div>
-                <div>
-                    <a href="register_clothe.html">衣服を登録する</a>
-                </div>
-                <div>
-                    <a href="register_coordinate.html">コーデを登録する</a>
-                </div>
-                <div>
-                    <a href="suggest.html">今日のオススメは？</a>
-                </div>
-            </div>
-            <div>
-                <div class="Right" id="userName"></div>
-                <a href="index.html"><div class="Right">ログアウト</div></a>
-            </div>
-        </div>
-
-        
-
-        <div class="row px-2 mt-4 gap-3" id="filterable-cards">
-            <!-- ここに衣服とコーデを表示 -->
-        </div>
-
-        <form id="imageForm" action="/selectImage" method="POST">
-            <input type="hidden" id="imageIdInput" name="imageId" value="">
-            <input type="hidden" id="kindInput" name="kind" value="">
-        </form>
-
+    <!-- メニューボタン -->
+    <button id="menuButton">≡</button>
+ 
+    <!-- ドロワーメニュー -->
+    <div id="drawerMenu">
+        <ul>
+            <li id="loginUser"><li>
+            <li><a href="register_clothe.html">衣服を登録する</a></li>
+            <li><a href="register_coordinate.html">コーデを登録する</a></li>
+            <li><a href="suggest.html">今日のオススメは？</a></li>
+            <li><a href="index.html">ログアウト</a></li>
+        </ul>
     </div>
+ 
+    <!-- オーバーレイ -->
+    <div id="drawerOverlay"></div>
+
+    <div class="row px-2 mt-4 gap-3" id="filterable-cards">
+        <!-- ここに衣服を表示 -->
+    </div>
+
+    <form id="imageForm" action="/selectImage" method="POST">
+        <input type="hidden" id="imageIdInput" name="imageId" value="">
+        <input type="hidden" id="kindInput" name="kind" value="">
+    </form>
+
+</div>
+
+</div>
 
     <script src="js/searchTag.js"></script>
 

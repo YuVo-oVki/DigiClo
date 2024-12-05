@@ -42,6 +42,7 @@ const corsOptions = {
   origin: `https://${host}:${port}`, // ここに許可するオリジンを指定
   methods: ['GET', 'POST'],       // 許可するHTTPメソッドを指定
 };
+const JWT_KEY = process.env.JWT_KEY;
 // / 変数設定 //
 
 // app.use //
@@ -113,18 +114,6 @@ app.post('/add-user', async (req, res) => {
     // パスワードをハッシュ化
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // データベースにユーザーを挿入
-    const insertQuery = `
-      INSERT INTO "users" (UserID, UserName, Email, password)
-      VALUES ($1, $2, $3, $4)
-      RETURNING UserID;
-    `;
-    const result = await client.query(insertQuery, [userId, userName, email, hashedPassword]);
-
-    res.status(201).json({ message: `ユーザー登録に成功しました: ${result.rows[0].userid}` });
-  } catch (error) {
-    console.error('ユーザー登録エラー:', error);
-
     let userIDQuery = `SELECT EXISTS (SELECT 1 FROM users WHERE UserID = $1)`;
     let userIdResult = await client.query(userIDQuery, [userId]);
     let emailQuery = `SELECT EXISTS (SELECT 1 FROM users WHERE Email = $1)`;
@@ -137,6 +126,19 @@ app.post('/add-user', async (req, res) => {
     } else {
       res.status(500).json({ error: 'ユーザー登録に失敗しました' });
     }
+    // データベースにユーザーを挿入
+    const insertQuery = `
+      INSERT INTO users (UserID, UserName, Email, password)
+      VALUES ($1, $2, $3, $4)
+      RETURNING UserID;
+    `;
+    const result = await client.query(insertQuery, [userId, userName, email, hashedPassword]);
+    // const token = jwt.sign({ id: userId, email: email }, JWT_KEY, { expiresIn: '1h' });
+
+    res.status(201).json({ message: `ユーザー登録に成功しました: ${result.rows[0].userid}` });
+  } catch (error) {
+    console.error('ユーザー登録エラー:', error);
+
   }
 });
 
@@ -145,7 +147,7 @@ app.post('/login', async (req, res) => {
   const { userId, password } = req.body;
 
   try {
-    const selectQuery = `SELECT * FROM "users" WHERE UserID = $1`;
+    const selectQuery = `SELECT * FROM users WHERE UserID = $1`;
     const result = await client.query(selectQuery, [userId]);
 
     if (result.rows.length === 0) {
@@ -160,6 +162,7 @@ app.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'パスワードが間違っています' });
     }
 
+    // const token = jwt.sign({ id: userId, email: result.row[0].email }, JWT_KEY, { expiresIn : '1h' })
     // ログイン成功時のレスポンス
     res.json({ message: 'ログイン成功', userName: user.username });
   } catch (error) {
@@ -168,62 +171,70 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/selectImage', (req, res) => {
-  const imageId = req.body.imageId;
-  const kind = req.body.kind;
-
-  if (kind === "Clothe") {
-      res.redirect(`/clothe_info.html?imageId=${imageId}`);
-  } else if (kind === "Coordinate") {
-      res.redirect(`/coordinate_info.html?imageId=${imageId}`);
-  } else {
-      res.status(400).send('Invalid kind specified.');
-  }
-});
 
 app.get('/logined', async (req, res) => {
+  // const token = req.headers['authorization'];
+  //   if (!token) return res.status(403).send("Token is required");
+
+  //   jwt.verify(token, SECRET_KEY, (err, decoded) => {
+  //       if (err) return res.status(401).send("Invalid token");
+  //       res.send(`Hello, user ${decoded.email}`);
+  //   });
   try {
     // clothesテーブルとcoordinateテーブルからデータを取得
     const clothesQuery = 'SELECT clotheid, clotheimage FROM clothes ORDER BY clotheid;';
     const coordinatesQuery = `
       SELECT coordinateid, coordinatename, clotheimage
       FROM (SELECT 
-            co.coordinateID,
-            co.coordinatename,
-            c.clotheimage,
-            ROW_NUMBER() OVER (PARTITION BY co.coordinateID ORDER BY c.clotheID) AS rn
-            FROM coordinate co
-            JOIN clothes c ON co.clotheID = c.clotheID)
+      co.coordinateID,
+      co.coordinatename,
+      c.clotheimage,
+      ROW_NUMBER() OVER (PARTITION BY co.coordinateID ORDER BY c.clotheID) AS rn
+      FROM coordinate co
+      JOIN clothes c ON co.clotheID = c.clotheID)
       WHERE rn = 1;
       ;
-    `;
+      `;
 
-    let clothesResult = "", coordinateResult = "";
-
-    try {
-      clothesResult = await client.query(clothesQuery);
-    } catch (err) {
-      console.log(err);
-    }
-
-    try {
-      coordinateResult = await client.query(coordinatesQuery);
-    } catch (err) {
-      console.log(err);
-    }
-
-    res.json({
-      clothes: clothesResult.rows,
-      coordinates: coordinateResult.rows || ""
-    });
+      let clothesResult = "", coordinateResult = "";
+      
+      try {
+        clothesResult = await client.query(clothesQuery);
+      } catch (err) {
+        console.log(err);
+      }
+      
+      try {
+        coordinateResult = await client.query(coordinatesQuery);
+      } catch (err) {
+        console.log(err);
+      }
+      
+      res.json({
+        clothes: clothesResult.rows,
+        coordinates: coordinateResult.rows || ""
+      });
   } catch (err) {
     console.error(err);
     res.status(500).send('Database error');
   }
 });
-
-app.get('/search', async (req, res) => {
   
+  app.post('/selectImage', (req, res) => {
+    const imageId = req.body.imageId;
+    const kind = req.body.kind;
+  
+    if (kind === "Clothe") {
+        res.redirect(`/clothe_info.html?imageId=${imageId}`);
+    } else if (kind === "Coordinate") {
+        res.redirect(`/coordinate_info.html?imageId=${imageId}`);
+    } else {
+        res.status(400).send('Invalid kind specified.');
+    }
+  });
+
+  app.get('/search', async (req, res) => {
+    
   try {
     const target = req.query.tag;
 
