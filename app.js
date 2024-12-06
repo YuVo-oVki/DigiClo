@@ -746,7 +746,6 @@ app.post('/deleteCoordinate', verifyToken, async(req, res) => {
       
       //天気情報の翻訳
       const weatherInJapanese = translateWeather(weatherData.weather);
-      console.log("weather:", weatherInJapanese);
       
       //キーワード生成
       const keyword = generateKeyword(weatherData.weather, weatherData.month, gender);
