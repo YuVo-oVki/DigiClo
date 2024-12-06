@@ -499,14 +499,28 @@ app.post('/editTag', verifyToken, async (req, res) => {
 });
 
 app.post('/deleteClothe', verifyToken, async(req, res) => {
-  
-  
   try {
     const { clotheId } = req.body;
     const { userId } = req.user;
+
+    // 衣服がコーディネートに含まれているか確認
+    const checkCoordinatedClothesQuery = 'SELECT 1 FROM coordinate WHERE userid = $1 AND clotheid = $2 LIMIT 1';
+    const coordinatedResult = await client.query(checkCoordinatedClothesQuery, [userId, clotheId]);
+
+    if (coordinatedResult.rowCount > 0) {
+      // コーディネートに登録されている場合
+      return res.status(400).json({ error: 'この衣服はコーディネートに登録されているため、削除できません。' });
+    }
+
+    // 衣服がコーディネートに含まれていない場合、削除を進める
     const selectQuery = 'SELECT clotheimage FROM clothes WHERE userid = $1 AND clotheid = $2';
     const deleteQuery = 'DELETE FROM clothes WHERE userid = $1 AND clotheid = $2';
     const clotheResult = await client.query(selectQuery, [userId, clotheId]);
+
+    if (!clotheResult.rows.length) {
+      return res.status(404).json({ error: '指定された衣服が見つかりません。' });
+    }
+
     await client.query(deleteQuery, [userId, clotheId]);
 
     const deleteFile = (filePath) => {
@@ -522,13 +536,13 @@ app.post('/deleteClothe', verifyToken, async(req, res) => {
     res.json({ status: "ok" });
   } catch (err) {
     console.error(err);
-    if (err.code == "23503") {
-      res.status(404).json('fKey error')
+    if (err.code === "23503") {
+      res.status(404).json({ error: '外部キー制約エラー' });
     } else {
-      res.status(500).json('Deletion error');
+      res.status(500).json({ error: '削除エラーが発生しました' });
     }
   }
-}); 
+});
 
 app.get('/getClotheAll', verifyToken, async (req, res) => {
   

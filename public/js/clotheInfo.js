@@ -80,27 +80,26 @@ function confirmDelete() {
     document.getElementById('confirmYes').addEventListener('click', () => {
         imageId = new URLSearchParams(window.location.search).get('imageId');
         const formdata = { clotheId : imageId }; 
+
+        const token = localStorage.getItem('token');
         
         fetch('/deleteClothe', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(formdata)
-        })
-        .then(response => {
-            if (response.status == 404) {
-                alert("登録したコーデに衣服が含まれているので削除できません。");
-                throw new Error("404: Unable to delete clothe.")
-            } else if (!response.ok) {
-                throw new Error("Bad response");
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              alert(data.error); // エラーメッセージを表示
+            } else {
+              alert('衣服を削除しました。');
             }
-            return response.json();
-        })
-        .then(data => {
-            alert(`衣服を削除しました。`);
-        })
-        .catch(error => console.error('Error:', error));
+          })
+          .catch(error => console.error('Error:', error));
         // 実際の削除処理（サーバー通信など）
         window.location.href = './logined.html'; // 削除後に戻る
     });

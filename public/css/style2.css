@@ -9,8 +9,23 @@ body {
   background: #f1f1f1 !important;
 }
 
-body .container {
-  max-width: 1100px;
+/* ヘッダーのスタイル */
+header {
+  background-color: #007bff; /* 青色の背景 */
+  color: white; /* 白い文字 */
+  text-align: center; /* 中央揃え */
+  padding: 1px 0; /* 上下の余白を調整 */
+  font-size: 10; /* フォントサイズを調整 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 下に軽い影を追加 */
+}
+
+/* タイトル自体のスタイル */
+#title {
+  margin: 0; /* 上下の余白をリセット */
+}
+
+div.container {
+  max-width: 100;
 }
 
 #filter-buttons button {
@@ -57,17 +72,24 @@ body .container {
 
 #title {
   margin: 1em;
+  font-size: 100;
   font-weight: bold;
   text-align: center;
 }
 
-#Ribbon {
+#drawerMenu {
   display: flex;
   justify-content: space-between;
 }
 
 #login_button {
   margin: 2em;
+}
+
+#main-content{
+  margin-left: auto;
+  margin-right: auto;
+  padding: auto;
 }
 
 /* Responsive Design for smaller screens */
@@ -106,16 +128,23 @@ body .container {
 }
 
 /* 入力欄とボタンのスタイル調整 */
-.tagInput {
-  padding: 10px;
+#tagInput {
+  padding: 3px;
   font-size: 16px;
   width: 200px;
 }
 
-.searchButton {
-  padding: 10px;
+#searchButton {
+  background-color: #a2d2ff;
+  padding: 5px;
   font-size: 16px;
   cursor: pointer;
+}
+
+#searchButton:hover {
+  color: #f1f1f1;
+  background-color: #0a5397;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body {
@@ -209,6 +238,8 @@ button {
   z-index: 999;
 }
 
+/* logined.html */
+/* ドロワーメニューのスタイル */
 #drawerMenu {
   position: fixed;
   top: 0;
@@ -277,8 +308,8 @@ body.drawer-open .main-content {
   top: 20px;
   right: 20px; /* ボタンを右側に配置 */
   z-index: 1100;
-  background-color: #58c1ee;
-  color: white;
+  background-color: #f5f7f9;
+  color: rgb(8, 8, 8);
   border: none;
   border-radius: 50%;
   width: 50px;
@@ -290,13 +321,32 @@ body.drawer-open .main-content {
   transition: transform 0.3s ease, background-color 0.3s ease, right 0.3s ease;
 }
 
-/* メニューが開いたときのボタンの位置 */
-#menuButton.active {
-  right: 250px; /* メニュー幅(250px) + 余白(20px) */
-  transform: rotate(90deg); /* ボタンを90度回転 */
-  background-color: #ff5f5f; /* 背景色を変更 */
+#menuButton:hover {
+  color: #ccc;
+  background-color: #8a8181;
 }
 
-#loginUser {
-  font-size: 25px;
+/* メニューが開いたときのボタンの位置 */
+#menuButton.active {
+  right: 270px; /* メニュー幅(250px) + 余白(20px) */
+  transform: rotate(360deg); /* ボタンを回転 */
+  color: #ccc;
+  background-color: #8a8181; /* 背景色を変更 */
+}
+
+#drawerMenu ul li:hover {
+  background-color: #a2d2ff; /* 背景色を変更 */
+  color: #fcfdfe; /* テキストの色を変更 */
+  cursor: pointer; /* ポインタに変更 */
+  transition: background-color 0.3s ease, color 0.3s ease; /* スムーズな変化 */
+}
+
+/* リンクの色も変更 */
+#drawerMenu ul li a:hover {
+  color: #0056b3; /* リンク色を変更 */
+}
+
+#icon{
+  width: 30px;
+  height: 30px;
 }

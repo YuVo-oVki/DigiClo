@@ -1,70 +1,104 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 20px;
 }
 
+
 #error {
-    color: red;
+  color: red;
 }
 
 #image img {
-    display:inline-block;
-    margin: 10px;
-    max-width: 200px;
-    height: auto;
+  display:inline-block;
+  margin: 10px;
+  max-width: 200px;
+  height: auto;
 }
 
 /* buttonタグのリセットCSS（不要な場合、セレクタごと削除してください） */
 button {
-    padding: 0;
-    font-family: inherit;
-    appearance: none;
-    cursor: pointer;
-    background-color: transparent;
-    border: none;
-    
-  }
+  padding: 0;
+  font-family: inherit;
+  appearance: none;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  
+}
 
 label {
-    padding-right: 20px;
-    padding-left: 20px;
+  padding-right: 40px;
+  padding-left: 40px;
 }
+
+/* ボタンのスタイル */
+#generate-button {
+  display: inline-block;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 320px;
+  height: 64px;
+  padding: 8px 24px;
+  margin-top: 50px;
+  font-family: sans-serif;
+  font-size: 16px;
+  color: #fff;
+  text-align: center;
+  overflow-wrap: anywhere;
+  background-color: #6fa24a;
+  border-radius: 32px; /* (buttonの高さ / 2) の値 */
   
-  /* ボタンのスタイル */
-  #generate-button {
-    display: inline-block;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 320px;
-    height: 64px;
-    padding: 8px 24px;
-    margin-top: 50px;
-    font-family: sans-serif;
-    font-size: 16px;
-    color: #fff;
-    text-align: center;
-    overflow-wrap: anywhere;
-    background-color: #6fa24a;
-    border-radius: 32px; /* (buttonの高さ / 2) の値 */
-    
+}
+
+#gender-check{
+  padding: 10px;
+  margin-left: 35%;
+  margin-right: 35%;
+  border: 4px solid #54802f;
+  border-radius: 10px;
+  background-color: #f8f8ff;
+  
+}
+
+@media (any-hover: hover) {
+  .buttonRound {
+    transition: background-color 0.2s;
   }
 
-  #gender-check{
-    padding: 10px;
-    margin-left: 35%;
-    margin-right: 35%;
-    border: 1px solid;
-    border-radius: 10px;
+  .buttonRound:hover {
+    background-color: #54802f;
   }
-  
-  @media (any-hover: hover) {
-    .buttonRound {
-      transition: background-color 0.2s;
-    }
-  
-    .buttonRound:hover {
-      background-color: #54802f;
-    }
-  }
+}
+
+#font {
+  margin-top: auto;
+  font-size: large;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+span {
+  color: red;
+}
+
+.box1{
+  padding: 0.5em 1em;
+  margin-bottom: 30px;
+  border: solid 5px #54802f;
+  background-color: #f8f8ff;
+}
+.outline {
+display        : inline-block;
+color          : #ffffff;            /* 文字の色 */
+font-size      : 40pt;               /* 文字のサイズ */
+letter-spacing : 4px;                /* 文字間 */
+text-shadow    : 
+     2px  2px 1px #336600,
+    -2px  2px 1px #336600,
+     2px -2px 1px #336600,
+    -2px -2px 1px #336600,
+     2px  0px 1px #336600,
+     0px  2px 1px #336600,
+    -2px  0px 1px #336600,
+     0px -2px 1px #336600;        /* 文字の影 */
+}

@@ -2,7 +2,10 @@ document.addEventListener('DOMContentLoaded', async () => {
    
     // JSONデータを取得
     const data = JSON.parse(localStorage.getItem('responseData'));
-
+    if (!data) {
+        alert('データが見つかりません。');
+        return;
+    }
     // // レスポンスのフォーマットをチェック
     // if (!data.labels || !data.colors) {
     //     throw new Error('レスポンスフォーマットが不正です');
@@ -24,14 +27,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     editButton.addEventListener("click", () => {
         // プロンプトでタグ名を入力
         const newTag = prompt("追加するタグを入力してください:");
-
-        if (newTag) {
-            // 新しいタグをliとして作成
+        if (newTag && newTag.trim() !== "") {
             const newTagItem = document.createElement("li");
             newTagItem.className = "tag";
             newTagItem.textContent = `${newTag}`;
-            // li要素をulに追加
             tagBox.appendChild(newTagItem);
+        } else {
+            alert("タグが空です。入力してください。");
         }
     });
 
@@ -43,7 +45,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (delTag) {
             // タグを全て取得
             const tags = tagBox.querySelectorAll("li");
-
             let found = false;
             tags.forEach((tag) => {
                 if (tag.textContent === delTag) {
