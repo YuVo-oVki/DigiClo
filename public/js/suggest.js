@@ -1,10 +1,16 @@
 async function fetchOutfit() {
     try {
       //ボタンから性別の取得
+      const token = localStorage.getItem('token');
       const gender = document.querySelector('input[name="gender"]:checked').value;
 
       //サーバーのエンドポイントにリクエスト
-      const response = await fetch(`/get-outfit?gender=${gender}`);  
+      const response = await fetch(`/get-outfit?gender=${gender}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      });
       const data = await response.json();
 
       //天気情報と気温の表示
