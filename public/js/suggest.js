@@ -17,16 +17,16 @@ async function fetchOutfit() {
       document.getElementById('weather').innerHTML = `
           <p>天気: ${data.weather}</p>
           <p>気温: ${data.temp}°C</p>
-          <p>オススメの服装:${data.keyword}</p>
+          <p>キーワード: ${data.keyword}</p>
       `;
 
       //画像を表示
       const imagesContainer = document.getElementById('image');
       imagesContainer.innerHTML = ''; //既存の内容をクリア
-      data.imageUrls.forEach((url, index) => {
+      data.image.forEach((imgs, index) => {
         const img = document.createElement('img');
-        img.src = url;
-        img.alt = `服装の提案${data.keyword} ${index + 1}`;
+        img.src = imgs;
+        img.alt = `服装の提案${index + 1}`;
         img.style.margin = '10px';
         img.style.maxWidth = '200px'
         imagesContainer.appendChild(img);

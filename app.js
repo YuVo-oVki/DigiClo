@@ -349,6 +349,10 @@ app.post('/tag', upload.single('image'), async (req, res) => {
     //ラベルをフィルタリングして信頼度の高いものを選択
     const allLabels = [...filteredLabels, ...colorLabels]; // ラベルと色を統合
 
+    fs.unlink(filePath, (err) => {
+      if (err) console.error('アップロードファイルの削除中にエラー:', err);
+    });
+
     // 結果をクライアントに返す
     res.json({labels: allLabels, path: imagePath});
   } catch (error) {
@@ -647,201 +651,161 @@ app.post('/deleteCoordinate', verifyToken, async(req, res) => {
   }
 }); 
 
+async function getWeather(city) {
+  const apiKey = process.env.WEATHER_API_KEY;
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
-  async function getWeather(city) {
-    const apiKey = process.env.WEATHER_API_KEY;
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-
-    try {
-      const response = await axios.get(url);
-      const weather = response.data.weather[0].main;  //天気情報
-      const temp = response.data.main.temp; //気温
-      const timestamp = response.data.dt; //現在のタイムスタンプ
-      const month = new Date(timestamp * 1000).getMonth() + 1; //月を取得
-      return { weather, temp, month };
-    } catch (error) {
-      console.error("Error fetching weather data:", error.message);
-      throw new Error("天気データを取得できませんでした。");
-    }
+  try {
+    const response = await axios.get(url);
+    const weather = response.data.weather[0].main;  //天気情報
+    const temp = response.data.main.temp; //気温
+    const humid = response.data.main.humidity; //気温
+    const timestamp = response.data.dt; //現在のタイムスタンプ
+    const month = new Date(timestamp * 1000).getMonth() + 1; //月を取得
+    return { weather, temp, month, humid };
+  } catch (error) {
+    console.error("Error fetching weather data:", error.message);
+    throw new Error("天気データを取得できませんでした。");
   }
+};
 
-  // 天気の英語を日本語に変換する関数
-  function translateWeather(weather) {
-    switch (weather) {
-      case 'Clear':
-        return '晴れ';
-      case 'Clouds':
-        return '曇り';
-      case 'Rain':
-        return '雨';
-      case 'Snow':
-        return '雪';
-      case 'Thunderstorm':
-        return '雷雨';
-      case 'Drizzle':
-        return '小雨';
-      case 'Mist':
-        return '霧';
-      default:
-        return '不明';  // 未対応の天気
-    }
-    
+// 天気の英語を日本語に変換する関数
+function translateWeather(weather) {
+  switch (weather) {
+    case 'Clear':
+      return '晴れ';
+    case 'Clouds':
+      return '曇り';
+    case 'Rain':
+      return '雨';
+    case 'Snow':
+      return '雪';
+    case 'Thunderstorm':
+      return '雷雨';
+    case 'Drizzle':
+      return '小雨';
+    case 'Mist':
+      return '霧';
+    default:
+      return '不明';  // 未対応の天気
   }
+};
 
-  //コーディネート用のキーワードを生成
-  function generateKeyword(weather, month, gender) {
+async function getWeather(city) {
+  const apiKey = process.env.WEATHER_API_KEY;
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
-    let baseKeyword;
-
-    if (weather && weather.main && weather.main.includes('Rain')) {
-      baseKeyword =  '雨の日 ファッション';
-    } else if (month >= 3 && month <= 5) {
-      baseKeyword =  '春 トレンド ファッション';
-    } else if (month >= 6 && month <= 8) {
-      baseKeyword =  '夏 トレンド ファッション';
-    } else if (month >= 9 && month <= 11) {
-      baseKeyword =  '秋 トレンド ファッション';
-    } else if (month >= 12 || month <= 2) {
-      baseKeyword =  '冬 トレンド ファッション';
-    }
-
-    // baseKeyword が未設定の場合、デフォルト値を返す
-    if (!baseKeyword) {
-      baseKeyword = 'カジュアル ファッション'; // デフォルトのキーワード
-    }
-
-    //性別によるキーワード調整
-    if (gender === 'female') {
-      return `${baseKeyword} 女性`;
-    } else if (gender === 'male') {
-      return `${baseKeyword} 男性`;
-    }
-    return baseKeyword;   //デフォルト 
+  try {
+    const response = await axios.get(url);
+    const weather = response.data.weather[0].main;  //天気情報
+    const temp = response.data.main.temp; //気温
+    const timestamp = response.data.dt; //現在のタイムスタンプ
+    const month = new Date(timestamp * 1000).getMonth() + 1; //月を取得
+    return { weather, temp, month };
+  } catch (error) {
+    console.error("Error fetching weather data:", error.message);
+    throw new Error("天気データを取得できませんでした。");
   }
+}
 
-  //画像検索
-  async function searchImages(keyword) {
-    const apiKey = process.env.BING_API_KEY;
-    const url = `https://api.bing.microsoft.com/v7.0/images/search?q=${encodeURIComponent(keyword)}&count=3&setLang=ja`;
-
-    try {
-      const response = await axios.get(url, {
-        headers: { 'Ocp-Apim-Subscription-Key': apiKey },
-      });
-      const imageUrls = response.data.value.map(img => img.contentUrl);  //複数の画像URL
-      return imageUrls;
-    } catch (error) {
-      console.error("Error fetching image:", error.message);
-      throw new Error("画像を取得できませんでした。")
-    }
+// 天気の英語を日本語に変換する関数
+function translateWeather(weather) {
+  switch (weather) {
+    case 'Clear':
+      return '晴れ';
+    case 'Clouds':
+      return '曇り';
+    case 'Rain':
+      return '雨';
+    case 'Snow':
+      return '雪';
+    case 'Thunderstorm':
+      return '雷雨';
+    case 'Drizzle':
+      return '小雨';
+    case 'Mist':
+      return '霧';
+    default:
+      return '不明';  // 未対応の天気
   }
-
-  //APIエンドポイント
-  app.get('/get-outfit', async (req, res) => {
-    const city = process.env.CITY || 'Tokyo';
-    const gender = req.query.gender || 'female'; //デフォルト
-    try {
-      //天気データ取得
-      const weatherData = await getWeather(city);
-      
-      //天気情報の翻訳
-      const weatherInJapanese = translateWeather(weatherData.weather);
-      
-      //キーワード生成
-      const keyword = generateKeyword(weatherData.weather, weatherData.month, gender);
-
-      //画像検索
-      const imageUrls = await searchImages(keyword);
-
-      //レスポンス
-      res.json({
-        weather: weatherInJapanese,
-        temp: weatherData.temp,
-        keyword,
-        imageUrls,
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-// 緯度と経度を受け取るルート
-app.post('/get-weather', (req, res) => {
-  // クライアントの接続を処理
-  io.on('connection', (socket) => {
-    console.log('A user connected');
-    
-    // クライアントが位置情報を送信してきたときの処理
-    socket.on('location-update', (data) => {
-      const clientId = socket.id;
-      clients[clientId] = { lat: data.latitude, lon: data.longitude };
-    });
-    
-    // クライアントの切断を処理
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-        delete clients[socket.id]; // 切断したクライアントのデータを削除
-    });
-  });
-
-  const { latitude, longitude } = req.body;
-
-  if (!latitude || !longitude) {
-    return res.status(400).json({ error: "緯度または経度が不足しています。" });
-  }
-
-  const url1h = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric&lang=ja`;
-
-  // 天気データの取得
-  https.get(url1h, (response) => {
-    let data = '';
   
-    // データを受信
-    response.on('data', (chunk) => {
-      data += chunk;
-    });
-  
-    // データ受信完了後の処理
-    response.on('end', () => {
-      const forecastData = JSON.parse(data); // 全データjson形式で取得
-      console.log(forecastData.current);
-      // console.log(forecastData.hourly);
+}
 
-      // 今のデータを取得 //
-      const crnt = forecastData.current;
-      const date = new Date();
-      const dateStr = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`;
-      const currentData = JSON.parse(`{ 
-                              "date":"${dateStr}",
-                              "weather":"${crnt.weather[0].description}",
-                              "temp":"${crnt.temp}",
-                              "humid":"${crnt.humidity}",
-                              "wind":"${crnt.wind_speed}",
-                              "hour":"${date.getHours()}"
-                        }`);
-      console.log(currentData);
-      // / 取得 //
-      
-      // 24時間先まで(分未満切り捨て)のデータを取得
-      // const hour = 24; 
-      // for (i = 0; i < hour.length; i++) {
-      //   JSON.parse(`
-      //     { "hour":"${// ここに時間を記入 //}"
-      //       "weather":"${crnt.weather[0].description}",
-      //       "temp":"${crnt.temp}",
-      //       "humid":"${crnt.humidity}",
-      //       "wind":"${crnt.wind_speed}"
-      //     }
-      //   `);
-      // }
+//コーディネート用のキーワードを生成
+function generateKeyword(weather, month, gender) {
 
-      // クライアントに天気予報データを送信
-      res.json(currentData);
+  let baseKeyword;
+
+  if (weather && weather.main && weather.main.includes('Rain')) {
+    baseKeyword =  '雨の日 ファッション';
+  } else if (month >= 3 && month <= 5) {
+    baseKeyword =  '春 トレンド ファッション';
+  } else if (month >= 6 && month <= 8) {
+    baseKeyword =  '夏 トレンド ファッション';
+  } else if (month >= 9 && month <= 11) {
+    baseKeyword =  '秋 トレンド ファッション';
+  } else if (month >= 12 || month <= 2) {
+    baseKeyword =  '冬 トレンド ファッション';
+  }
+
+  // baseKeyword が未設定の場合、デフォルト値を返す
+  if (!baseKeyword) {
+    baseKeyword = 'カジュアル ファッション'; // デフォルトのキーワード
+  }
+
+  //性別によるキーワード調整
+  if (gender === 'female') {
+    return `${baseKeyword} 女性`;
+  } else if (gender === 'male') {
+    return `${baseKeyword} 男性`;
+  }
+  return baseKeyword;   //デフォルト 
+}
+
+//画像検索
+async function searchImages(keyword) {
+  const apiKey = process.env.BING_API_KEY;
+  const url = `https://api.bing.microsoft.com/v7.0/images/search?q=${encodeURIComponent(keyword)}&count=3&setLang=ja`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: { 'Ocp-Apim-Subscription-Key': apiKey },
     });
-  }).on('error', (err) => {
-    console.error(`エラー: ${err.message}`);
-    res.status(500).json({ error: "天気情報の取得に失敗しました。" });
-  });
+    const imageUrls = response.data.value.map(img => img.contentUrl);  //複数の画像URL
+    return imageUrls;
+  } catch (error) {
+    console.error("Error fetching image:", error.message);
+    throw new Error("画像を取得できませんでした。")
+  }
+}
+
+//APIエンドポイント
+app.get('/get-outfit', async (req, res) => {
+  const city = process.env.CITY || 'Tokyo';
+  const gender = req.query.gender || 'female'; //デフォルト
+  try {
+    //天気データ取得
+    const weatherData = await getWeather(city);
+    
+    //天気情報の翻訳
+    const weatherInJapanese = translateWeather(weatherData.weather);
+    
+    //キーワード生成
+    const keyword = generateKeyword(weatherData.weather, weatherData.month, gender);
+
+    //画像検索
+    const image = await searchImages(keyword);
+
+    //レスポンス
+    res.json({
+      weather: weatherInJapanese,
+      temp: weatherData.temp,
+      keyword,
+      image,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 server.listen(port, host, () => {
