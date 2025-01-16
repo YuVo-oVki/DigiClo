@@ -659,46 +659,6 @@ async function getWeather(city) {
     const response = await axios.get(url);
     const weather = response.data.weather[0].main;  //天気情報
     const temp = response.data.main.temp; //気温
-    const humid = response.data.main.humidity; //気温
-    const timestamp = response.data.dt; //現在のタイムスタンプ
-    const month = new Date(timestamp * 1000).getMonth() + 1; //月を取得
-    return { weather, temp, month, humid };
-  } catch (error) {
-    console.error("Error fetching weather data:", error.message);
-    throw new Error("天気データを取得できませんでした。");
-  }
-};
-
-// 天気の英語を日本語に変換する関数
-function translateWeather(weather) {
-  switch (weather) {
-    case 'Clear':
-      return '晴れ';
-    case 'Clouds':
-      return '曇り';
-    case 'Rain':
-      return '雨';
-    case 'Snow':
-      return '雪';
-    case 'Thunderstorm':
-      return '雷雨';
-    case 'Drizzle':
-      return '小雨';
-    case 'Mist':
-      return '霧';
-    default:
-      return '不明';  // 未対応の天気
-  }
-};
-
-async function getWeather(city) {
-  const apiKey = process.env.WEATHER_API_KEY;
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-
-  try {
-    const response = await axios.get(url);
-    const weather = response.data.weather[0].main;  //天気情報
-    const temp = response.data.main.temp; //気温
     const timestamp = response.data.dt; //現在のタイムスタンプ
     const month = new Date(timestamp * 1000).getMonth() + 1; //月を取得
     return { weather, temp, month };
