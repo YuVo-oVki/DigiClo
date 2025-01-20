@@ -65,36 +65,42 @@ confBtn = document.getElementById('confirmButton');
 confBtn.addEventListener('click', async () => {
     
     const items = document.getElementsByClassName('tag');
-    const tags = Array.from(items).map(item => item.textContent).join(','); 
 
-    const path = (JSON.parse(localStorage.getItem('responseData')).path).replace("public", "");
+    if (items.length != 0) {
+        console.log(items)
+        const tags = Array.from(items).map(item => item.textContent).join(','); 
 
-    const data = {
-        imgPath: path,
-        tags: tags
-    }
+        const path = (JSON.parse(localStorage.getItem('responseData')).path).replace("public", "");
 
-    const token = localStorage.getItem('token');
-    fetch('/registerClothe', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data) // JSONとして送信
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Request failed');
+        const data = {
+            imgPath: path,
+            tags: tags
         }
-        return response.json();
-    })
-    .then(data => {
-        alert('登録が完了しました！');
-        window.location.href = "logined.html"; // リダイレクト
-    })
-    .catch(error => {
-        alert("エラーが発生しました: " + error.message); // エラーメッセージ
-    });
+
+        const token = localStorage.getItem('token');
+        fetch('/registerClothe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data) // JSONとして送信
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Request failed');
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert('登録が完了しました！');
+            window.location.href = "logined.html"; // リダイレクト
+        })
+        .catch(error => {
+            alert("エラーが発生しました: " + error.message); // エラーメッセージ
+        });
+    } else {
+        alert("タグを最低1つ入力してください")    
+    }
     
 });
