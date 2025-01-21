@@ -56,8 +56,8 @@ app.use(express.static(path.join(__dirname, 'public'))); // 静的ファイル�
 // / app.use //
 
 // HTTPS設定 //
-const private = 'C:/ssl/private-key.pem';
-const cert = 'C:/ssl/cert.pem';
+const private = 'ssl/private-key.pem';
+const cert = 'ssl/cert.pem';
 const privateKey = fs.readFileSync(private, 'utf8');
 const certificate = fs.readFileSync(cert, 'utf8');
 const credentials = { key: privateKey, cert: certificate };

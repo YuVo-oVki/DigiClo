@@ -1,5 +1,0 @@
-ssl/cert.pem
-ssl/private-key.pem
-.env
-uploads
-public/images/clothes/*
