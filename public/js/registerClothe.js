@@ -109,9 +109,9 @@ function confirmImage() {
             // }
         })
         .catch(error => {
-            alert("エラーが発生しました: " + error.message);
+            alert("画像の登録に失敗しました");
         });
     } catch (error) {
-        alert("エラーが発生しました: " + error.message);
+        alert("エラーが発生しました");
     }
 }
