@@ -13,7 +13,7 @@
 
     <body>
         <header>
-            <h1 id="title">DigiClo</h1>
+            <h1 id="title"><span id="turn">DigiClo</span></h1>
         </header>
 
         <div class="main-content">
@@ -63,6 +63,13 @@
         </div>
 
         <script src="js/logined.js"></script>
+        <script>
+            document.getElementById("turn").addEventListener("click", function() {
+                // logined.htmlに遷移
+                window.location.href = "logined.html";
+            });
+        </script>
+
 
     </body>
 </html>
