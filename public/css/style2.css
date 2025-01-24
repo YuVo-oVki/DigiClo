@@ -377,3 +377,32 @@ body.drawer-open .main-content {
   background-color: #d3d3d3; /* カーソル時に灰色に変更 */
   transition: background-color 0.3s ease; /* 背景色を滑らかに変更 */
 }
+
+#userinfo {
+  margin-left: 90%;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+#userinfo img {
+  width: 40px;
+  height: auto;
+  margin-right: 10px;
+}
+
+#userinfo p {
+  font-size: 20px;
+  margin: 0;
+}
+
+#userinfo a {
+  margin: 0;
+}
+
+#logout {
+  margin-left: 92%;
+  font-size: 15px;
+  margin-top: 0%;
+  margin-bottom: 0%;
+}
