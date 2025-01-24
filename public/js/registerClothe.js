@@ -62,7 +62,7 @@ function confirmImage() {
 
         // ファイルが選択されていない場合
         if (!imgInput.files || !imgInput.files[0]) {
-            errorMessage.textContent = "写真の読み込みができませんでした。";
+            errorMessage.textContent = "写真を選択してください。";
             errorMessage.style.display = "block";
             return;
         }
