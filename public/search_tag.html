@@ -11,7 +11,7 @@
 </head>
 <body>
     <header>
-        <h1 id="title">DigiClo</h1>
+        <h1 id="title"><span id="turn">DigiClo</span></h1>
     </header>
 
     <div class="main-content">
@@ -31,6 +31,22 @@
  
     <!-- オーバーレイ -->
     <div id="drawerOverlay"></div>
+    <div class="tag-search">
+        <button id="backButton" onclick="history.back()">←</button>
+        <input type="text" id="tagInput" placeholder="タグを検索">
+        <button id="searchButton">検索</button>
+    </div>
+    <div class="tag-result" id="searchResults"></div>
+
+    <!-- Images Filter Buttons Section -->
+    <div class="row mt-5" id="filter-buttons">
+        <div class="col-12">
+            <select id="change">
+                <option value="Clothe" selected>衣服</option>
+                <option value="Coordinate">コーデ</option>
+            </select>
+        </div>
+    </div>
 
     <div class="row px-2 mt-4 gap-3" id="filterable-cards">
         <!-- ここに衣服を表示 -->
@@ -46,6 +62,12 @@
 </div>
 
     <script src="js/searchTag.js"></script>
+    <script>
+        document.getElementById("turn").addEventListener("click", function() {
+            // logined.htmlに遷移
+            window.location.href = "logined.html";
+        });
+    </script>
 
 </body>
 </html>
