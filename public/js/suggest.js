@@ -33,7 +33,7 @@ async function fetchOutfit() {
       });
     } catch (error){
       //エラー
-      document.getElementById('error').innerText = "Error fetching outfit data. Please try again";
+      document.getElementById('error').innerText = "画像の取得に失敗しました。しばらく経ってから再度お試しください。";
       console.error('Error',error);
     }
   }

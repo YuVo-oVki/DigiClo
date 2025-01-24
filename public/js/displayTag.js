@@ -97,7 +97,7 @@ confBtn.addEventListener('click', async () => {
             window.location.href = "logined.html"; // リダイレクト
         })
         .catch(error => {
-            alert("エラーが発生しました: " + error.message); // エラーメッセージ
+            alert("衣服の登録に失敗しました"); // エラーメッセージ
         });
     } else {
         alert("タグを最低1つ入力してください")    

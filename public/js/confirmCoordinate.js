@@ -74,9 +74,9 @@ window.onload = function() {
                 alert('登録が完了しました！');
                 window.location.href = './logined.html';
             })
-            // .catch(error => console.error('エラー:', error));
-        // } catch (err) {
-        //     console.error("エラーが発生しました:", err);
-        // }
+            .catch(error => {
+                console.error(`コーデの登録に失敗しました: ${error}`);
+                alert('コーデの登録に失敗しました');
+            });
     });
 };
