@@ -17,11 +17,22 @@ header {
   padding: 1px 0; /* 上下の余白を調整 */
   font-size: 10; /* フォントサイズを調整 */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 下に軽い影を追加 */
+  width: 100%; /* ヘッダー幅を100%に固定 */
 }
+
 
 /* タイトル自体のスタイル */
 #title {
   margin: 0; /* 上下の余白をリセット */
+  padding: 0; /* パディングを削除 */
+}
+
+#title span {
+  display: inline; /* 必要最低限の幅を持たせる */
+  cursor: pointer; /* ポインター（指マーク） */
+  color: #f6eded; /* 通常時の文字色 */
+  transition: color 0.3s; /* ホバー時の色変更を滑らかに */
+  
 }
 
 div.container {
@@ -243,17 +254,17 @@ button {
 #drawerMenu {
   position: fixed;
   top: 0;
-  right: -250px; /* 初期状態で画面外に隠す */
+  left: -250px; /* 初期状態で画面外に隠す */
   width: 250px;
   height: 100%;
   background-color: #f8f9fa;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-  transition: right 0.3s ease;
+  transition: left 0.3s ease;
   z-index: 1000;
 }
 
 #drawerMenu.open {
-  right: 0; /* メニューが表示される状態 */
+  left: 0; /* メニューが表示される状態 */
 }
 
 /* メニューが開いているときの body */
@@ -267,7 +278,7 @@ body.drawer-open {
 }
 
 body.drawer-open .main-content {
-  margin-right: 250px; /* メニュー幅分右にずらす  */
+  margin-left: 250px; /* メニュー幅分左にずらす  */
 }
 
 #drawerMenu ul {
@@ -305,8 +316,8 @@ body.drawer-open .main-content {
 /* メニューボタン */
 #menuButton {
   position: fixed;
-  top: 20px;
-  right: 20px; /* ボタンを右側に配置 */
+  top: 40px;
+  left: 20px; /* ボタンを右側に配置 */
   z-index: 1100;
   background-color: #f5f7f9;
   color: rgb(8, 8, 8);
@@ -318,7 +329,7 @@ body.drawer-open .main-content {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.3s ease, background-color 0.3s ease, right 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease,left 0.3s ease;
 }
 
 #menuButton:hover {
@@ -328,7 +339,7 @@ body.drawer-open .main-content {
 
 /* メニューが開いたときのボタンの位置 */
 #menuButton.active {
-  right: 270px; /* メニュー幅(250px) + 余白(20px) */
+  left: 270px; /* メニュー幅(250px) + 余白(20px) */
   transform: rotate(360deg); /* ボタンを回転 */
   color: #ccc;
   background-color: #8a8181; /* 背景色を変更 */
@@ -349,4 +360,20 @@ body.drawer-open .main-content {
 #icon{
   width: 30px;
   height: 30px;
+}
+
+#backButton {
+  position: absolute; /* 左端に寄せるために絶対位置を使用 */
+  left: 10px; /* 左端から10pxの余白を設定 */
+  background-color: #f9fbfd;
+  font-size: 20px; /* フォントサイズを調整 */
+  cursor: pointer; /* ポインタに変更 */
+  padding: 5px 10px; /* ボタンに適度なパディングを追加 */
+  border-radius: 12px; /* 角を丸くする */
+  border: #202e3d;
+}
+
+#backButton:hover {
+  background-color: #d3d3d3; /* カーソル時に灰色に変更 */
+  transition: background-color 0.3s ease; /* 背景色を滑らかに変更 */
 }
