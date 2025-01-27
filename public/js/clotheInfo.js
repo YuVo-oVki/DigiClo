@@ -54,7 +54,7 @@ window.onload = async () => {
 
 // 戻るボタン処理
 function goBack() {
-    window.location.href = './logined.html'; // 元のページに戻る
+    window.history.back(); // ひとつ前のページに戻る
 }
 
 function edit() {
