@@ -26,14 +26,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ボタンクリック時の処理
     editButton.addEventListener("click", () => {
         // プロンプトでタグ名を入力
-        const newTag = prompt("追加するタグを入力してください:");
-        if (newTag && newTag.trim() !== "") {
-            const newTagItem = document.createElement("li");
-            newTagItem.className = "tag";
-            newTagItem.textContent = `${newTag}`;
-            tagBox.appendChild(newTagItem);
-        } else {
-            alert("タグが空です。入力してください。");
+        let newTag = prompt("追加するタグを入力してください:");
+
+        if (newTag && newTag.trim()) {
+            const tags = tagBox.querySelectorAll("li");
+            let found = false;
+
+            newTag = newTag.trim();
+            tags.forEach((tag) => {
+                if (tag.textContent === newTag) {
+                    found = true;
+                }
+            });
+
+            if (found != true) {    
+                const newTagItem = document.createElement("li");
+                newTagItem.className = "tag";
+                newTagItem.textContent = `${newTag}`;
+            
+                // li要素をulに追加
+                tagBox.appendChild(newTagItem);
+            } else {
+                alert("既に登録されています");
+            }
         }
     });
 
@@ -41,18 +56,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 削除ボタンをクリックしたときの処理
     deleteButton.addEventListener("click", () => {
         const delTag = prompt("削除したいタグを入力してください:");
-
-        if (delTag) {
+        
+        if (delTag && delTag.trim()) {
             // タグを全て取得
             const tags = tagBox.querySelectorAll("li");
+            
             let found = false;
             tags.forEach((tag) => {
-                if (tag.textContent === delTag) {
+                if (tag.textContent === delTag.trim()) {
                     tag.remove(); // 一致したタグを削除
                     found = true;
                 }
             });
-
+            
             if (!found) {
                 alert("指定されたタグが見つかりませんでした。");
             }

@@ -29,16 +29,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editButton = document.querySelector(".edit-btn");
     // ボタンクリック時の処理
     editButton.addEventListener("click", () => {
-        // プロンプトでタグ名を入力
-        const newTag = prompt("追加するタグを入力してください:");
-        
-        if (newTag) {
-            // 新しいタグをliとして作成
-            const newTagItem = document.createElement("li");
-            newTagItem.className = "tag";
-            newTagItem.textContent = `${newTag}`;
-            // li要素をulに追加
-            tagBox.appendChild(newTagItem);
+        let newTag = prompt("追加するタグを入力してください:");
+
+        if (newTag && newTag.trim()) {
+            const tags = tagBox.querySelectorAll("li");
+            let found = false;
+
+            newTag = newTag.trim();
+            tags.forEach((tag) => {
+                if (tag.textContent === newTag) {
+                    found = true;
+                }
+            });
+
+            if (found != true) {    
+                const newTagItem = document.createElement("li");
+                newTagItem.className = "tag";
+                newTagItem.textContent = `${newTag}`;
+            
+                // li要素をulに追加
+                tagBox.appendChild(newTagItem);
+            } else {
+                alert("既に登録されています");
+            }
         }
     });
     
@@ -47,13 +60,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     deleteButton.addEventListener("click", () => {
         const delTag = prompt("削除したいタグを入力してください:");
         
-        if (delTag) {
+        if (delTag && delTag.trim()) {
             // タグを全て取得
             const tags = tagBox.querySelectorAll("li");
             
             let found = false;
             tags.forEach((tag) => {
-                if (tag.textContent === delTag) {
+                if (tag.textContent === delTag.trim()) {
                     tag.remove(); // 一致したタグを削除
                     found = true;
                 }
@@ -104,6 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 //     alert("エラーが発生しました: " + error.message); // エラーメッセージ
                 // });
         } else {
-            alert("タグを最低1つ入力してください")
+            alert("タグを最低1つ追加してください");
         }
 });  
