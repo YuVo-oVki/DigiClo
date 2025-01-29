@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>写真の追加</title>
+    <link rel="stylesheet" href="css/register_clothe.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>写真の追加</h1>
+        <div class="form">
+            <input type="file" id="imageUpload" accept="image/*">
+        </div>
+
+        <div>※登録には時間がかかることがあります。</div>
+        
+        <div class="image-preview" id="imagePreview">
+            <p>ここに画像が表示されます</p>
+        </div>
+        <p class="error-message" id="errorMessage"></p>
+        <button class="confirm-button" id="uploadButton" onclick="confirmImage()">確定</button>
+        <button class="confirm-button" onclick="history.back()">戻る</button>
+    </div>
+
+    <script src="./js/registerClothe.js"></script>
+</body>
+</html>

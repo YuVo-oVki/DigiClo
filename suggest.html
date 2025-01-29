@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather-based Outfit</title>
+    <link rel="stylesheet" href="./css/suggest.css">
+</head>
+<body>
+  <div class="box1">
+    <span class="outline">コーディネート提案</span>
+  </div>
+
+    <!-- 性別の選択ボタン -->
+    <div id="gender-check">
+      <p id="font">≪ 性別を選択してください<span>!!</span> ≫</p>
+      <label>
+        <input type="radio" name="gender" value="female" checked>
+        女性
+      </label>
+      <label>
+        <input type="radio" name="gender" value="male">
+        男性
+      </label>
+    </div>
+
+    <!-- 画像生成ボタン -->
+    <div class="flexbox">
+    <button id="generate-button">コーディネートを生成</button>
+    <button id="back-button" onclick="history.back()">戻る</button>
+    </div>
+
+    <!-- 結果の表示 -->
+    <div id="weather"></div>
+    <div id="image"></div>
+    <div id="error"></div>
+
+    <script src="./js/suggest.js"></script>
+</body>
+</html>
