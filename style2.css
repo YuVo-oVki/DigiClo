@@ -1,0 +1,422 @@
+/* Import Google font - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+* {
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #f1f1f1 !important;
+}
+
+/* ヘッダーのスタイル */
+header {
+  background-color: #007bff; /* 青色の背景 */
+  color: white; /* 白い文字 */
+  text-align: center; /* 中央揃え */
+  padding: 1px 0; /* 上下の余白を調整 */
+  font-size: 10; /* フォントサイズを調整 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 下に軽い影を追加 */
+  width: 100%; /* ヘッダー幅を100%に固定 */
+}
+
+
+/* タイトル自体のスタイル */
+#title {
+  margin: 0; /* 上下の余白をリセット */
+  padding: 0; /* パディングを削除 */
+}
+
+#title span {
+  display: inline; /* 必要最低限の幅を持たせる */
+  cursor: pointer; /* ポインター（指マーク） */
+  color: #f6eded; /* 通常時の文字色 */
+  transition: color 0.3s; /* ホバー時の色変更を滑らかに */
+  
+}
+
+div.container {
+  max-width: 100;
+}
+
+#filter-buttons button {
+  border-radius: 3px;
+  background: #fff;
+  border-color: transparent;
+}
+
+#filter-buttons button:hover {
+  background: #ddd;
+}
+
+#filter-buttons button.active {
+  color: #fff;
+  background: #6c757d;
+}
+
+/* Grid layout for cards */
+#filterable-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.card {
+  width: 100%; /* Ensure each card takes full width of the grid cell */
+  border: 2px solid transparent;
+}
+
+.card img {
+  width: 100%; /* Ensures images are responsive and cover the card width */
+  height: 200px; /* Fixed height for images */
+  object-fit: cover; /* Maintain aspect ratio without distortion */
+}
+
+.card-body {
+  padding: 0.5rem;
+}
+
+.card.hide {
+  display: none;
+}
+
+#title {
+  margin: 1em;
+  font-size: 100;
+  font-weight: bold;
+  text-align: center;
+}
+
+#drawerMenu {
+  display: flex;
+  justify-content: space-between;
+}
+
+#login_button {
+  margin: 2em;
+}
+
+#main-content{
+  margin-left: auto;
+  margin-right: auto;
+  padding: auto;
+}
+
+/* Responsive Design for smaller screens */
+@media (max-width: 1024px) {
+  #filterable-cards {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns for medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  #filterable-cards {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  #filterable-cards {
+    grid-template-columns: 1fr; /* 1 column for very small screens */
+  }
+}
+
+/* 検索欄を中央寄せするスタイル */
+.tag-search {
+  display: flex;
+  justify-content: center; /* 水平方向に中央寄せ */
+  align-items: center;    /* 必要なら垂直方向の揃え */
+  margin: 0 auto;         /* 自動余白で中央寄せ */
+  text-align: center;     /* テキスト要素を中央揃え */
+  height: 10vh;          /* ビューポート全体の高さを確保 */
+}
+
+/* 入力欄とボタンの間のスペースを調整 */
+.tag-search input,
+.tag-search button,
+.register-clothe,
+.register-coordinate {
+  margin: 10px;
+}
+
+/* 入力欄とボタンのスタイル調整 */
+#tagInput {
+  padding: 3px;
+  font-size: 16px;
+  width: 200px;
+}
+
+#searchButton {
+  background-color: #a2d2ff;
+  padding: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#searchButton:hover {
+  color: #f1f1f1;
+  background-color: #0a5397;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.register-clothe,.register-coordinate,
+a.register-clothe,a.register-coordinate {
+  color: #fff;
+  background-color: #eb6100;
+}
+.register-clothe:hover,.register-coordinate:hover,
+a.register-clothe:hover,a.register-coordinate:hover {
+  color: #fff;
+  background: #f56500;
+}
+
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+#info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* 縦方向中央揃え */
+  background-color: #f8f9fa; /* 背景色（任意） */
+}
+
+#contents {
+  text-align: center; /* 中央揃え */
+}
+
+#imageContainer img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%; /* 画像が画面幅を超えないようにする */
+  height: auto;
+}
+
+.mt-3 {
+  margin-top: 20px; /* ボタン間のスペースを調整 */
+}
+
+button {
+  margin: 5px; /* ボタン間のスペース */
+}
+
+.confirm-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+}
+
+.confirm-dialog p {
+  margin-bottom: 20px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+
+/* 確認ダイアログのスタイル */
+.confirm-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+}
+
+.confirm-dialog p {
+  margin-bottom: 20px;
+}
+
+/* 背景のオーバーレイ */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* logined.html */
+/* ドロワーメニューのスタイル */
+#drawerMenu {
+  position: fixed;
+  top: 0;
+  left: -250px; /* 初期状態で画面外に隠す */
+  width: 250px;
+  height: 100%;
+  background-color: #f8f9fa;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+
+#drawerMenu.open {
+  left: 0; /* メニューが表示される状態 */
+}
+
+/* メニューが開いているときの body */
+body.drawer-open {
+  overflow: hidden; /* スクロールを無効化して見切れを防ぐ */
+}
+
+/* コンテンツ全体の調整 */
+.main-content {
+  transition: margin-right 0.3s ease; /* メニューと一緒に動く */
+}
+
+body.drawer-open .main-content {
+  margin-left: 250px; /* メニュー幅分左にずらす  */
+}
+
+#drawerMenu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#drawerMenu ul li {
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+#drawerMenu ul li a {
+  text-decoration: none;
+  color: #333;
+}
+
+/* オーバーレイ */
+#drawerOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+#drawerOverlay.active {
+  display: block; /* オーバーレイが表示される状態 */
+}
+
+/* メニューボタン */
+#menuButton {
+  position: fixed;
+  top: 40px;
+  left: 20px; /* ボタンを右側に配置 */
+  z-index: 1100;
+  background-color: #f5f7f9;
+  color: rgb(8, 8, 8);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease,left 0.3s ease;
+}
+
+#menuButton:hover {
+  color: #ccc;
+  background-color: #8a8181;
+}
+
+/* メニューが開いたときのボタンの位置 */
+#menuButton.active {
+  left: 270px; /* メニュー幅(250px) + 余白(20px) */
+  transform: rotate(360deg); /* ボタンを回転 */
+  color: #ccc;
+  background-color: #8a8181; /* 背景色を変更 */
+}
+
+#drawerMenu ul li:hover {
+  background-color: #a2d2ff; /* 背景色を変更 */
+  color: #fcfdfe; /* テキストの色を変更 */
+  cursor: pointer; /* ポインタに変更 */
+  transition: background-color 0.3s ease, color 0.3s ease; /* スムーズな変化 */
+}
+
+/* リンクの色も変更 */
+#drawerMenu ul li a:hover {
+  color: #0056b3; /* リンク色を変更 */
+}
+
+#icon{
+  width: 30px;
+  height: 30px;
+}
+
+#backButton {
+  position: absolute; /* 左端に寄せるために絶対位置を使用 */
+  left: 10px; /* 左端から10pxの余白を設定 */
+  background-color: #f9fbfd;
+  font-size: 20px; /* フォントサイズを調整 */
+  cursor: pointer; /* ポインタに変更 */
+  padding: 5px 10px; /* ボタンに適度なパディングを追加 */
+  border-radius: 12px; /* 角を丸くする */
+  border: #202e3d;
+}
+
+#backButton:hover {
+  background-color: #d3d3d3; /* カーソル時に灰色に変更 */
+  transition: background-color 0.3s ease; /* 背景色を滑らかに変更 */
+}
+
+#userinfo {
+  margin-left: 90%;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+#userinfo img {
+  width: 40px;
+  height: auto;
+  margin-right: 10px;
+}
+
+#userinfo p {
+  font-size: 20px;
+  margin: 0;
+}
+
+#userinfo a {
+  margin: 0;
+}
+
+#logout {
+  margin-left: 92%;
+  font-size: 15px;
+  margin-top: 0%;
+  margin-bottom: 0%;
+}
