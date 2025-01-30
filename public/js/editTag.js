@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return response.json();
             })
             .then(data => {
-                alert('変更処理が完了しました！');
+                alert('登録が完了しました！');
                 window.location.href = "logined.html"; // リダイレクト
             })
             // .catch(error => {

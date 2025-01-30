@@ -116,7 +116,7 @@ confBtn.addEventListener('click', async () => {
             alert("衣服の登録に失敗しました"); // エラーメッセージ
         });
     } else {
-        alert("タグを最低1つ入力してください")    
+        alert("タグを最低1つ追加してください")    
     }
     
 });
